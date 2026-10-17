@@ -7,7 +7,7 @@ go build -ldflags "-X main.SSM_VERSION=$VERSION"
 ```
 
 System deps: `libusb-1.0-dev`, `libavformat-dev`, `libavcodec-dev`, `libavutil-dev`, gcc, pkgconf.
-On Windows: MSYS2 + MinGW with mingw-w64-x86_64-{gcc,pkgconf,libusb,ffmpeg,ntldd}. See `.github/workflows/release.yml`.
+On Windows: MSYS2 + MinGW with mingw-w64-ucrt-x86_64-{gcc,pkgconf,libusb,ffmpeg,ntldd} (UCRT64). See `.github/workflows/release.yml`.
 
 No tests, no linter/formatter config in the repo.
 

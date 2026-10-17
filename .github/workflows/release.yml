@@ -138,20 +138,24 @@ jobs:
       - name: Install dependencies
         shell: pwsh
         run: |
-          $env:MSYSTEM = "MINGW64"
+          # MSYS2 no longer ships every package for the legacy mingw64 environment; use UCRT64.
+          $env:MSYSTEM = "UCRT64"
           # The first -Syu may only update the core runtime and exit, so run it twice.
           C:\msys64\usr\bin\bash -lc "pacman --noconfirm -Syu"
           C:\msys64\usr\bin\bash -lc "pacman --noconfirm -Syu"
-          C:\msys64\usr\bin\bash -lc "pacman --noconfirm -S --needed mingw-w64-x86_64-gcc mingw-w64-x86_64-pkgconf mingw-w64-x86_64-libusb mingw-w64-x86_64-ffmpeg mingw-w64-x86_64-ntldd"
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          C:\msys64\usr\bin\bash -lc "pacman --noconfirm -S --needed mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-pkgconf mingw-w64-ucrt-x86_64-libusb mingw-w64-ucrt-x86_64-ffmpeg mingw-w64-ucrt-x86_64-ntldd"
+          if ($LASTEXITCODE -ne 0) {
+            C:\msys64\usr\bin\bash -lc "pacman -Ss 'libusb|ffmpeg|pkgconf|ntldd'"
+            exit 1
+          }
           C:\msys64\usr\bin\bash -lc "pkg-config --exists libusb-1.0 libavformat libavcodec libavutil"
           if ($LASTEXITCODE -ne 0) { Write-Error "pkg-config cannot find libusb/ffmpeg"; exit 1 }
 
       - name: Build
         env:
-          PKG_CONFIG_PATH: C:\msys64\mingw64\lib\pkgconfig;C:\msys64\mingw64\share\pkgconfig
+          PKG_CONFIG_PATH: C:\msys64\ucrt64\lib\pkgconfig;C:\msys64\ucrt64\share\pkgconfig
         run: |
-          $env:PATH = "C:\msys64\mingw64\bin;" + $env:PATH
+          $env:PATH = "C:\msys64\ucrt64\bin;" + $env:PATH
           go build -ldflags "-X main.SSM_VERSION=$env:VERSION" -o ssm-gui.exe
 
       - name: Copy exe and dlls
@@ -159,7 +163,7 @@ jobs:
         run: |
           mkdir build
           cp ./ssm-gui.exe ./build/
-          for dll in $(/c/msys64/mingw64/bin/ntldd.exe -R ./ssm-gui.exe | awk '{ if ($3 ~ /^C:\\msys64/) print $3; }'); do
+          for dll in $(/c/msys64/ucrt64/bin/ntldd.exe -R ./ssm-gui.exe | awk '{ if ($3 ~ /^C:\\msys64/) print $3; }'); do
             cp -v $dll ./build/
           done
 
