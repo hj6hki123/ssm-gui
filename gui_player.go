@@ -128,11 +128,10 @@ func (p *player) prepare(req gui.RunRequest) (playController, []common.ViscousEv
 func loadChart(req gui.RunRequest, pjsk bool) (scores.Chart, error) {
 	path := req.ChartPath
 	if path == "" {
-		matches, err := findMusicscorePath(pjsk, req.SongID, req.Diff)
-		if err != nil || len(matches) == 0 {
-			return nil, errors.New("musicscore not found: extract the assets first or use a custom chart path")
+		var err error
+		if path, err = findChart(assetsRoot, pjsk, req.SongID, req.AltSongIDs, req.Diff); err != nil {
+			return nil, err
 		}
-		path = matches[0]
 	}
 
 	text, err := os.ReadFile(path)
@@ -149,15 +148,51 @@ func loadChart(req gui.RunRequest, pjsk bool) (scores.Chart, error) {
 	return chart, nil
 }
 
-// findMusicscorePath returns the chart files matching a song id and
-// difficulty under the extracted assets directory.
-func findMusicscorePath(pjsk bool, songID int, difficulty string) ([]string, error) {
-	if pjsk {
-		return filepath.Glob(filepath.Join("./assets/sekai/assetbundle/resources/startapp/music/music_score/",
-			fmt.Sprintf("%04d_01/%s.txt", songID, difficulty)))
+// assetsRoot is where Extract writes the asset bundles' contents.
+const assetsRoot = "./assets"
+
+// findChart returns the extracted chart of a song and difficulty. Some songs
+// are listed twice with the same chart (e.g. #786 and #790), and the game may
+// only have downloaded one of them, so altIDs are tried after songID.
+func findChart(root string, pjsk bool, songID int, altIDs []int, difficulty string) (string, error) {
+	for _, id := range append([]int{songID}, altIDs...) {
+		matches, _ := filepath.Glob(chartPattern(root, pjsk, id, difficulty))
+		if len(matches) > 0 {
+			if id != songID {
+				log.Infof("Chart of song #%d not found, using the same chart of song #%d", songID, id)
+			}
+			return matches[0], nil
+		}
 	}
-	return filepath.Glob(filepath.Join("./assets/star/forassetbundle/startapp/musicscore/",
-		fmt.Sprintf("musicscore*/%03d/*_%s.txt", songID, difficulty)))
+	return "", chartNotFound(root, pjsk, songID, difficulty)
+}
+
+// chartPattern is the glob matching a song's chart under the assets root.
+func chartPattern(root string, pjsk bool, songID int, difficulty string) string {
+	if pjsk {
+		return filepath.Join(root, "sekai/assetbundle/resources/startapp/music/music_score",
+			fmt.Sprintf("%04d_01", songID), difficulty+".txt")
+	}
+	return filepath.Join(root, "star/forassetbundle/startapp/musicscore",
+		"musicscore*", fmt.Sprintf("%03d", songID), "*_"+difficulty+".txt")
+}
+
+// chartNotFound explains why a chart is missing: the song was never extracted
+// (the game has not downloaded it), or it lacks this difficulty.
+func chartNotFound(root string, pjsk bool, songID int, difficulty string) error {
+	others, _ := filepath.Glob(chartPattern(root, pjsk, songID, "*"))
+	if len(others) == 0 {
+		return fmt.Errorf("the chart of song #%d is not in the extracted assets (%s). "+
+			"Download the song in the game (play or preview it once), extract the assets again, "+
+			"or use a custom chart path", songID, root)
+	}
+	found := make([]string, 0, len(others))
+	for _, p := range others {
+		name := strings.TrimSuffix(filepath.Base(p), ".txt")
+		found = append(found, name[strings.LastIndex(name, "_")+1:])
+	}
+	return fmt.Errorf("song #%d has no %s chart in the extracted assets (found: %s)",
+		songID, strings.ToUpper(difficulty), strings.Join(found, ", "))
 }
 
 // touchConfig returns the touch generation and humanization settings for req.

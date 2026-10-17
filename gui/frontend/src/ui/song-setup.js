@@ -7,7 +7,7 @@ import { t } from '../core/i18n.js';
 import { showPage } from '../core/nav.js';
 import { state } from '../core/state.js';
 import { diffName } from '../data/difficulty.js';
-import { jacketUrls, loadedSongDB, songArtist, songTitle } from '../data/songdb.js';
+import { jacketUrls, loadedSongDB, sameChartIds, songArtist, songTitle } from '../data/songdb.js';
 import { savedDevices } from './devices.js';
 import { renderDiffButtons, selectDiff } from './difficulty-picker.js';
 import { clearSong } from './search.js';
@@ -83,6 +83,12 @@ function redirectToDeviceSettings(serial) {
   }, 50);
 }
 
+// Songs with the same chart, tried by the backend if songId's is missing.
+function altSongIds(songId) {
+  const db = loadedSongDB(state.mode);
+  return db && state.mode === 'bang' ? sameChartIds(db, songId, state.diff) : [];
+}
+
 function submitRun() {
   const songId = parseInt($('song-id').value) || state.songId || 0;
   const chartPath = $('chart-path').value.trim();
@@ -97,6 +103,7 @@ function submitRun() {
     diff: diffName(state.mode, state.diff),
     orient: state.orient,
     songId,
+    altSongIds: altSongIds(songId),
     chartPath,
     deviceSerial: serial,
     nowPlaying: nowPlaying(),

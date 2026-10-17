@@ -34,7 +34,8 @@ type RunRequest struct {
 	Diff         string     `json:"diff"`
 	Orient       string     `json:"orient"` // "left" or "right"
 	SongID       int        `json:"songId"`
-	ChartPath    string     `json:"chartPath"` // custom chart; overrides SongID/Diff
+	AltSongIDs   []int      `json:"altSongIds"` // songs with the same chart, tried if SongID's is missing
+	ChartPath    string     `json:"chartPath"`  // custom chart; overrides SongID/Diff
 	DeviceSerial string     `json:"deviceSerial"`
 	NowPlaying   NowPlaying `json:"nowPlaying"`
 

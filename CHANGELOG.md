@@ -4,6 +4,12 @@ User-facing notes for each release. The release workflow publishes the section
 that matches the tag as the GitHub release description, so write these for
 players, not for developers.
 
+## [Unreleased]
+
+**Fixes**
+- Songs listed twice with the same chart (such as #786 / #790 ときめきエクスペリエンス！ (月島まりなver.)) now play from whichever copy the game has downloaded.
+- When a chart can't be found, the message now says why: the song isn't in the extracted assets yet (play or preview it once in the game, then extract again), or which difficulties it does have.
+
 ## [3.7.1] - 2026-10-17
 
 **Display fixes**

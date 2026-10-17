@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { availableDiffs, jacketUrls, normalizeForSearch, normalizeSongDB, pickName, searchSongs, songArtist } from './songdb.js';
+import { availableDiffs, jacketUrls, sameChartIds, normalizeForSearch, normalizeSongDB, pickName, searchSongs, songArtist } from './songdb.js';
 
 // Bestdori (BanG Dream) payload: songs keyed by id, already in UI shape.
 const bang = normalizeSongDB({
   songs: {
     1: { musicTitle: ['ティアドロップス', 'Teardrops', '淚滴', null, null], difficulty: { 3: { playLevel: 25 }, 0: { playLevel: 8 } }, bandId: 1, jacketImage: ['t1'] },
     2: { musicTitle: ['EXIST', 'EXIST', null, null, null], difficulty: {}, bandId: 2 },
+    786: { musicTitle: ['ときめき (まりなver.)', 'Tokimeki'], difficulty: { 3: { playLevel: 25 }, 4: { playLevel: 26 } } },
+    790: { musicTitle: ['ときめき (まりなver.)', 'Tokimeki'], difficulty: { 3: { playLevel: 25 }, 4: { playLevel: 27 } } },
     13: { musicTitle: ['Existence', 'Existence', null, null, null], difficulty: {}, bandId: 2 },
   },
   bands: { 1: { bandName: ['Poppin\'Party', null, null, null, null] }, 2: { bandName: ['Roselia', null, null, null, null] } },
@@ -64,6 +66,19 @@ describe('search', () => {
   it('credits the band, or the Sekai artist', () => {
     expect(searchSongs(bang, 'teardrops', 'bang')[0].artist).toBe('Poppin\'Party');
     expect(songArtist(sekai, sekai.songs[11], 'pjsk')).toBe('livetune');
+  });
+});
+
+describe('sameChartIds', () => {
+  it('finds the same title at the same level under another id', () => {
+    expect(sameChartIds(bang, 786, 3)).toEqual([790]);
+    expect(sameChartIds(bang, 790, 3)).toEqual([786]);
+  });
+
+  it('skips a different chart or a missing song', () => {
+    expect(sameChartIds(bang, 786, 4)).toEqual([]);
+    expect(sameChartIds(bang, 1, 3)).toEqual([]);
+    expect(sameChartIds(bang, 999, 3)).toEqual([]);
   });
 });
 

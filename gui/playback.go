@@ -169,11 +169,11 @@ func (s *Server) finish() {
 	s.status.State = StateDone
 	s.publishLocked()
 
-	req := s.lastRun
+	req, seq := s.lastRun, s.runSeq
 	go func() {
 		time.Sleep(time.Second)
 		s.mu.Lock()
-		if s.status.State != StateDone || s.lastRun != req {
+		if s.status.State != StateDone || s.runSeq != seq {
 			s.mu.Unlock()
 			return // replaced or restarted meanwhile
 		}
@@ -194,6 +194,7 @@ func (s *Server) handleRun(w http.ResponseWriter, r *http.Request) {
 	}
 	s.mu.Lock()
 	s.lastRun = req
+	s.runSeq++
 	s.status.GreatReq = req.GreatCount
 	s.status.GreatApply = 0
 	s.mu.Unlock()

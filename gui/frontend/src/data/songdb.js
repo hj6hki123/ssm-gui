@@ -137,6 +137,20 @@ export function availableDiffs(song) {
   return Object.keys(song.difficulty || {}).map(Number).sort();
 }
 
+// Other songs listed with the same title and the same level at difficulty
+// diff, i.e. the same chart under another id (e.g. #786 and #790). The game may
+// only have downloaded one of them.
+export function sameChartIds(db, id, diff) {
+  const song = db.songs[id];
+  const title = song && song.musicTitle && song.musicTitle[0];
+  const level = song && song.difficulty?.[diff]?.playLevel;
+  if (!title || !level) return [];
+  return Object.entries(db.songs)
+    .filter(([key, s]) => Number(key) !== id && s && s.musicTitle
+      && s.musicTitle[0] === title && s.difficulty?.[diff]?.playLevel === level)
+    .map(([key]) => Number(key));
+}
+
 const searchKeys = new WeakMap(); // song → [[lowercase, normalized], …]
 
 // Songs whose names contain query, best matches first: exact title, then

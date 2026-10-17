@@ -35,6 +35,7 @@ type Server struct {
 	mu      sync.Mutex // guards the fields below
 	status  Status
 	lastRun RunRequest    // most recent run request, replayed by Restart
+	runSeq  int           // bumped on every run request
 	song    *preparedSong // song armed for playback
 }
 
