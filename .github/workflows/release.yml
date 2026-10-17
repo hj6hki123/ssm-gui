@@ -138,16 +138,18 @@ jobs:
       - name: Install dependencies
         shell: pwsh
         run: |
+          $env:MSYSTEM = "MINGW64"
+          # The first -Syu may only update the core runtime and exit, so run it twice.
           C:\msys64\usr\bin\bash -lc "pacman --noconfirm -Syu"
-          C:\msys64\usr\bin\bash -lc "pacman --noconfirm -Sy mingw-w64-x86_64-gcc"
-          C:\msys64\usr\bin\bash -lc "pacman --noconfirm -Sy mingw-w64-x86_64-pkgconf"
-          C:\msys64\usr\bin\bash -lc "pacman --noconfirm -Sy mingw-w64-x86_64-libusb"
-          C:\msys64\usr\bin\bash -lc "pacman --noconfirm -Sy mingw-w64-x86_64-ffmpeg"
-          C:\msys64\usr\bin\bash -lc "pacman --noconfirm -Sy mingw-w64-x86_64-ntldd"
+          C:\msys64\usr\bin\bash -lc "pacman --noconfirm -Syu"
+          C:\msys64\usr\bin\bash -lc "pacman --noconfirm -S --needed mingw-w64-x86_64-gcc mingw-w64-x86_64-pkgconf mingw-w64-x86_64-libusb mingw-w64-x86_64-ffmpeg mingw-w64-x86_64-ntldd"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          C:\msys64\usr\bin\bash -lc "pkg-config --exists libusb-1.0 libavformat libavcodec libavutil"
+          if ($LASTEXITCODE -ne 0) { Write-Error "pkg-config cannot find libusb/ffmpeg"; exit 1 }
 
       - name: Build
         env:
-          PKG_CONFIG_PATH: C:\msys64\mingw64\lib\pkgconfig;C:\msys64\msys64\mingw64\share\pkgconfig
+          PKG_CONFIG_PATH: C:\msys64\mingw64\lib\pkgconfig;C:\msys64\mingw64\share\pkgconfig
         run: |
           $env:PATH = "C:\msys64\mingw64\bin;" + $env:PATH
           go build -ldflags "-X main.SSM_VERSION=$env:VERSION" -o ssm-gui.exe
