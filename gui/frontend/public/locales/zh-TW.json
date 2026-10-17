@@ -84,6 +84,7 @@
   "log.fail": "失敗：",
   "log.conn.fail": "連線失敗：",
   "log.no.song": "請先選擇歌曲或輸入自訂譜面路徑。",
+  "log.extract.no.path": "請輸入要提取的資料夾路徑。",
   "log.extract.start": "正在提取：",
   "log.extract.done": "完成！已產生 assets/ 資料夾。",
   "log.extract.fail": "錯誤：",

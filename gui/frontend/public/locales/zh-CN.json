@@ -84,6 +84,7 @@
   "log.fail": "失败：",
   "log.conn.fail": "连接失败：",
   "log.no.song": "请先选择歌曲或输入自定义谱面路径。",
+  "log.extract.no.path": "请输入要提取的文件夹路径。",
   "log.extract.start": "正在提取：",
   "log.extract.done": "完成！已生成 assets/ 文件夹。",
   "log.extract.fail": "错误：",

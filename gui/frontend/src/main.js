@@ -40,7 +40,6 @@ const I18n = (function () {
     document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
       el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
     });
-    const d = langs[id] || {};
     const meta = langMeta.filter(function (m) { return m.id === id; })[0] || langMeta[0];
     document.getElementById('lb-name').textContent = meta.shortName;
     document.querySelectorAll('.lang-opt').forEach(function (opt) {
@@ -136,7 +135,7 @@ function toggleDevDrop(e) {
 
 function loadDevOptions() {
   fetch('/api/device')
-    .then(function (r) { return r.json(); })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(function (d) {
       const drop = document.getElementById('dev-drop');
       drop.classList.add('dev-drop-style');
@@ -153,7 +152,8 @@ function loadDevOptions() {
         }).join('');
       }
       drop.classList.add('open');
-    });
+    })
+    .catch(logConnFail('song-log'));
 }
 
 
@@ -284,9 +284,10 @@ function setMode(m) {
     ADV_DEFAULTS.flickDuration = 20; ADV_DEFAULTS.flickFactor = 17;
   } else {
     ADV_DEFAULTS.flickDuration = 60; ADV_DEFAULTS.flickFactor = 20;
-    if (S.diff === 5) S.diff = 3;
   }
   updateDiffLabels();
+  // APPEND only exists in PJSK; fall back to EXPERT so a visible button stays selected.
+  if (m !== 'pjsk' && S.diff === 5) setDiff(3);
   resetAdvanced();
 }
 function setBackend(b) {
@@ -352,7 +353,7 @@ function loadDB(cb, onErr) {
       cb(S.db);
     })
     .catch(function (e) {
-      log('song-log', t('log.conn.fail') + e, 'err');
+      logConnFail('song-log')(e);
       if (onErr) onErr(e);
     });
 }
@@ -512,7 +513,7 @@ function normalizeForSearch(s) {
   // Remove spaces and common punctuation (including full-width and half-width)
   return String(s || '')
     .toLowerCase()
-    .replace(/[\s\-_.,:;!?\[\]{}'"""~`・，。；！？「」『』（）]/g, '');
+    .replace(/[\s\-_.,:;!?[\]{}'"""~`・，。；！？「」『』（）]/g, '');
 }
 
 function doSearch(q) {
@@ -706,29 +707,30 @@ function updateUI(d) {
     if (st === 4 && d.error) log('play-log', t('log.fail') + d.error, 'err');
   }
 
-	if (st === 1 && typeof d.greatReq === 'number' && typeof d.greatApply === 'number') {
-		const greatSig = String(d.greatReq) + '/' + String(d.greatApply);
-		if (greatSig !== S._lastGreatSig) {
-			S._lastGreatSig = greatSig;
-			log('play-log', t('log.great.pre') + d.greatApply + t('log.great.mid') + d.greatReq, d.greatApply > 0 ? 'ok' : 'info');
-		}
-	}
+  if (st === 1 && typeof d.greatReq === 'number' && typeof d.greatApply === 'number') {
+    const greatSig = String(d.greatReq) + '/' + String(d.greatApply);
+    if (greatSig !== S._lastGreatSig) {
+      S._lastGreatSig = greatSig;
+      log('play-log', t('log.great.pre') + d.greatApply + t('log.great.mid') + d.greatReq, d.greatApply > 0 ? 'ok' : 'info');
+    }
+  }
 }
 
 // Paint a jacket <img> with multi-URL fallback, toggling its "no artwork"
 // placeholder sibling.
 function paintJacket(imgId, noId, np) {
   const img = document.getElementById(imgId);
-  if (np.jacketUrl) {
-    setImageWithFallback(img, np.jacketUrls && np.jacketUrls.length ? np.jacketUrls : [np.jacketUrl]);
-    img.style.display = 'block';
-    document.getElementById(noId).style.display = 'none';
-  } else {
+  const placeholder = document.getElementById(noId);
+  function showPlaceholder() {
     img.onerror = null;
     img.removeAttribute('src');
     img.style.display = 'none';
-    document.getElementById(noId).style.display = 'flex';
+    placeholder.style.display = 'flex';
   }
+  if (!np.jacketUrl) { showPlaceholder(); return; }
+  img.style.display = 'block';
+  placeholder.style.display = 'none';
+  setImageWithFallback(img, np.jacketUrls && np.jacketUrls.length ? np.jacketUrls : [np.jacketUrl], showPlaceholder);
 }
 
 function setDiffBadge(id, rawDiff) {
@@ -795,11 +797,13 @@ function applyJacketColor(themeColor) {
   document.documentElement.classList.toggle('is-append-diff', themeColor === '#4f8ff7' || themeColor === '#f26ec9');
 }
 
-function setImageWithFallback(imgEl, urls) {
+// Try each URL in turn; call onAllFailed when none of them loads.
+function setImageWithFallback(imgEl, urls, onAllFailed) {
   let i = 0;
   function tryNext() {
     if (i >= urls.length) {
       imgEl.onerror = null;
+      onAllFailed();
       return;
     }
     const u = urls[i++];
@@ -821,6 +825,15 @@ document.addEventListener('keydown', function (e) {
 });
 
 // ══ API ════════════════════════════════════════════════════
+function sendJSON(url, body, method) {
+  return fetch(url, { method: method || 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+}
+
+// Returns a .catch handler that logs a network failure to the given log box.
+function logConnFail(boxId) {
+  return function (e) { log(boxId, t('log.conn.fail') + e, 'err'); };
+}
+
 function buildNowPlaying() {
   const np = { songId: S.songId, diff: diffName(S.diff), mode: S.mode, title: '', artist: '', diffLevel: 0, jacketUrl: '', jacketUrls: [] };
   if (S.songData) {
@@ -893,7 +906,7 @@ function submitRun() {
 
         setTimeout(function () {
           devCard.style.boxShadow = '';
-          devCard.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+          devCard.style.borderColor = '';
         }, 2000);
       }
     }, 50);
@@ -908,36 +921,58 @@ function submitRun() {
   const adv = getAdvancedValues();
   const body = { mode: S.mode, backend: S.backend, diff: diffName(S.diff), orient: S.orient, songId: sid, chartPath: cp, deviceSerial: ds, nowPlaying: buildNowPlaying(), timingJitter: tRaw, positionJitter: jitterRealValue('position', pRaw), tapDurJitter: dRaw, greatOffsetMs: grOffsetRaw, greatCount: grCountRaw, tapDuration: adv.tapDuration, flickDuration: adv.flickDuration, flickReportInterval: adv.flickReportInterval, slideReportInterval: adv.slideReportInterval, flickFactor: adv.flickFactor, flickPow: adv.flickPow };
   log('song-log', t('log.loading'), 'info');
-  fetch('/api/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+  sendJSON('/api/run', body)
     .then(function (r) { if (r.ok) { log('song-log', t('log.sent'), 'ok'); nav('play'); } else r.text().then(function (tx) { log('song-log', t('log.fail') + tx, 'err'); }); })
-    .catch(function (e) { log('song-log', t('log.conn.fail') + e, 'err'); });
+    .catch(logConnFail('song-log'));
 }
 
-function apiStart() { if (S.state !== 1) return; fetch('/api/start', { method: 'POST' }).catch(function (e) { log('play-log', t('log.conn.fail') + e, 'err'); }); }
-function apiRestart() { fetch('/api/restart', { method: 'POST' }); }
+function apiStart() { if (S.state !== 1) return; fetch('/api/start', { method: 'POST' }).catch(logConnFail('play-log')); }
+function apiRestart() { fetch('/api/restart', { method: 'POST' }).catch(logConnFail('play-log')); }
 
+// Offset nudges are batched for 50 ms so holding an arrow key sends one request.
 let _adjTimer = null, _adjPending = 0;
-function adj(d) { _adjPending += d; clearTimeout(_adjTimer); _adjTimer = setTimeout(function () { if (_adjPending === 0) return; const delta = _adjPending; _adjPending = 0; fetch('/api/offset', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ delta: delta }) }); }, 50); }
-function resetOff() { _adjPending = 0; clearTimeout(_adjTimer); const delta = -S.offset; if (delta === 0) return; fetch('/api/offset', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ delta: delta }) }); }
+function sendOffset(delta) { sendJSON('/api/offset', { delta: delta }).catch(logConnFail('play-log')); }
+function adj(d) {
+  _adjPending += d;
+  clearTimeout(_adjTimer);
+  _adjTimer = setTimeout(function () {
+    if (_adjPending === 0) return;
+    const delta = _adjPending;
+    _adjPending = 0;
+    sendOffset(delta);
+  }, 50);
+}
+function resetOff() {
+  _adjPending = 0;
+  clearTimeout(_adjTimer);
+  if (S.offset !== 0) sendOffset(-S.offset);
+}
 
 // ══ devices ════════════════════════════════════════════════
 function loadDevices() {
-  fetch('/api/device').then(function (r) { return r.json(); }).then(function (d) {
+  fetch('/api/device').then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (d) {
     S.devices = d || {};
     const list = document.getElementById('dev-list');
     if (!d || !Object.keys(d).length) { list.innerHTML = '<div style="font-size:12px;color:var(--hint)">' + t('device.none') + '</div>'; return; }
     list.innerHTML = Object.entries(d).map(function (e) { return '<div class="dev-row"><span class="dev-s">' + esc(e[0]) + '</span><span>' + e[1].width + ' × ' + e[1].height + '</span><button class="btn-del" data-action="deleteDevice" data-serial="' + escAttr(e[0]) + '">' + t('settings.device.delete') + '</button></div>'; }).join('');
-  });
+  }).catch(logConnFail('song-log'));
 }
 function saveDevice() {
   const s = document.getElementById('dc-s').value.trim(), w = parseInt(document.getElementById('dc-w').value) || 0, h = parseInt(document.getElementById('dc-h').value) || 0;
   if (!s || !w || !h) { document.getElementById('dc-hint').textContent = t('dc.hint.missing'); return; }
-  fetch('/api/device', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serial: s, width: w, height: h }) })
-    .then(function (r) { if (r.ok) { document.getElementById('dc-hint').textContent = t('dc.hint.saved'); loadDevices(); } else document.getElementById('dc-hint').textContent = t('dc.hint.fail'); });
+  const hint = document.getElementById('dc-hint');
+  sendJSON('/api/device', { serial: s, width: w, height: h })
+    .then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      hint.textContent = t('dc.hint.saved');
+      loadDevices();
+    })
+    .catch(function () { hint.textContent = t('dc.hint.fail'); });
 }
 function deleteDevice(serial) {
-  fetch('/api/device', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serial: serial }) })
-    .then(function (r) { if (r.ok) loadDevices(); });
+  sendJSON('/api/device', { serial: serial }, 'DELETE')
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); loadDevices(); })
+    .catch(function () { document.getElementById('dc-hint').textContent = t('dc.hint.fail'); });
 }
 
 // ══ ADB & Device Utilities ════════════════════════════════
@@ -948,7 +983,7 @@ function killAdbServer() {
       if (r.ok) log('song-log', t('log.adb.killed'), 'ok');
       else log('song-log', t('log.adb.kill.fail'), 'err');
     })
-    .catch(function (e) { log('song-log', t('log.conn.fail') + e, 'err'); });
+    .catch(logConnFail('song-log'));
 }
 
 function autoDetectDevice() {
@@ -1009,11 +1044,11 @@ function getAdvancedValues() {
 // ══ extraction ═════════════════════════════════════════════
 function doExtract() {
   const p = document.getElementById('ex-path').value.trim();
-  if (!p) { log('ex-log', t('log.no.song'), 'err'); return; }
+  if (!p) { log('ex-log', t('log.extract.no.path'), 'err'); return; }
   log('ex-log', t('log.extract.start') + p, 'info');
-  fetch('/api/extract', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: p }) })
+  sendJSON('/api/extract', { path: p })
     .then(function (r) { if (r.ok) log('ex-log', t('log.extract.done'), 'ok'); else r.text().then(function (tx) { log('ex-log', t('log.extract.fail') + tx, 'err'); }); })
-    .catch(function (e) { log('ex-log', t('log.conn.fail') + e, 'err'); });
+    .catch(logConnFail('ex-log'));
 }
 // ══ initialization ═════════════════════════════════════════
 I18n.init();

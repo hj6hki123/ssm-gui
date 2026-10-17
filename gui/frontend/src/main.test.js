@@ -316,3 +316,39 @@ describe('manual song id', () => {
     expect(document.getElementById('sel-bar').classList.contains('show')).toBe(false);
   });
 });
+
+describe('regressions', () => {
+  // The UI language may have been switched by an earlier test.
+  const either = (key) => [enLocale[key], zhTwLocale[key]];
+
+  it('asks for a folder when extracting with an empty path', () => {
+    setInput('#ex-path', '');
+    click('[data-action="doExtract"]');
+    const last = document.getElementById('ex-log').lastElementChild.textContent;
+    expect(either('log.extract.no.path').some((m) => last.includes(m))).toBe(true);
+  });
+
+  it('keeps a visible difficulty selected when leaving PJSK on APPEND', () => {
+    click('[data-action="setMode"][data-arg="pjsk"]');
+    click('[data-action="setDiff"][data-arg="5"]');
+    click('[data-action="setMode"][data-arg="bang"]');
+    expect(document.querySelector('.db.active').dataset.arg).toBe('3');
+  });
+
+  it('shows the placeholder when every jacket URL fails', () => {
+    const np = { songId: 77, title: 'NO ART', diff: 'easy', jacketUrl: 'http://x/missing.png' };
+    sse.onmessage({ data: JSON.stringify({ state: 1, nowPlaying: np }) });
+    const img = document.getElementById('pn-img');
+    img.onerror(); // the only URL fails
+    expect(img.style.display).toBe('none');
+    expect(document.getElementById('pn-no').style.display).toBe('flex');
+  });
+
+  it('reports a device save that never reached the backend', async () => {
+    fetch.mockImplementationOnce(() => Promise.reject(new Error('offline')));
+    setInput('#dc-s', 'OFFLINE'); setInput('#dc-w', '1'); setInput('#dc-h', '1');
+    click('[data-action="saveDevice"]');
+    await flush();
+    expect(either('dc.hint.fail')).toContain(document.getElementById('dc-hint').textContent);
+  });
+});

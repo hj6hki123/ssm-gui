@@ -84,6 +84,7 @@
   "log.fail": "Failed: ",
   "log.conn.fail": "Connection failed: ",
   "log.no.song": "Please select a song or enter a custom chart path.",
+  "log.extract.no.path": "Please enter the folder to extract.",
   "log.extract.start": "Extracting: ",
   "log.extract.done": "Done! assets/ generated.",
   "log.extract.fail": "Error: ",

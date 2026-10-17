@@ -84,6 +84,7 @@
   "log.fail": "失敗：",
   "log.conn.fail": "接続失敗：",
   "log.no.song": "楽曲を選択するか、カスタム譜面パスを入力してください",
+  "log.extract.no.path": "抽出するフォルダのパスを入力してください",
   "log.extract.start": "抽出中：",
   "log.extract.done": "完了！assets/ を生成しました",
   "log.extract.fail": "エラー：",
