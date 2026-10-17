@@ -4,7 +4,7 @@ User-facing notes for each release. The release workflow publishes the section
 that matches the tag as the GitHub release description, so write these for
 players, not for developers.
 
-## [Unreleased]
+## [3.7.1] - 2026-10-17
 
 **Display fixes**
 - Project Sekai **MASTER** badges in the search results now have their color.
