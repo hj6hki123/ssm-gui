@@ -1,0 +1,358 @@
+/* Sidebar: logo, theme/language buttons, navigation and the now-playing card. */
+
+.sidebar {
+  /* Glassmorphism: semi-transparent background + blur. */
+  @apply w-64 flex flex-col p-5 z-10;
+  background: var(--ui-sidebar-bg);
+  backdrop-filter: var(--ui-glass-filter-soft);
+  border-right: 1px solid var(--ui-sidebar-border);
+  box-shadow: var(--ui-sidebar-shadow);
+}
+
+.sidebar-top {
+  @apply flex justify-between items-center mb-8 px-2 mt-2;
+}
+
+.top-actions {
+  @apply flex items-center gap-2;
+}
+
+.logo {
+  @apply font-black text-2xl tracking-tighter text-ssm-blue flex items-center gap-2;
+}
+
+html[data-theme='light'] .logo {
+  color: #10243c;
+}
+
+.theme-btn {
+  @apply w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300;
+  background: var(--ui-theme-btn-bg);
+  border: 1px solid var(--ui-theme-btn-border);
+  color: var(--ui-theme-btn-text);
+}
+
+.theme-btn:hover {
+  color: var(--ui-theme-btn-hover-text);
+  border-color: var(--ui-theme-btn-hover-border);
+  background: var(--ui-theme-btn-hover-bg);
+}
+
+/* ── Language picker ─────────────────────────────────────── */
+
+.lang-picker {
+  @apply relative;
+}
+
+html[data-theme='light'] #lang-btn {
+  background: var(--ui-glass-bg-strong);
+  border-color: rgba(37, 99, 235, 0.28);
+  color: #1e3a5f;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.12);
+}
+
+html[data-theme='light'] #lang-btn:hover {
+  background: color-mix(in srgb, var(--ui-glass-bg-strong) 80%, #ffffff 20%);
+  border-color: rgba(37, 99, 235, 0.42);
+}
+
+.lang-menu {
+  @apply absolute top-full right-0 mt-2 w-28 bg-ssm-surface rounded-xl border border-ssm-border z-50 overflow-hidden hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.lang-menu.open {
+  @apply block animate-[fadeIn_0.2s_ease-out_forwards];
+}
+
+html[data-theme='light'] .lang-menu {
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+}
+
+.lang-opt {
+  @apply flex flex-col px-4 py-2 hover:bg-[#2a2a2a] cursor-pointer border-b border-ssm-border last:border-0 transition-colors active:bg-[#333];
+}
+
+.lang-opt.active {
+  @apply bg-[#2a2a2a] border-l-4 border-l-ssm-blue;
+}
+
+html[data-theme='light'] .lang-opt:hover,
+html[data-theme='light'] .lang-opt.active {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.lo-info {
+  @apply flex flex-col;
+}
+
+.lo-name {
+  @apply flex items-center text-sm font-bold text-white;
+}
+
+html[data-theme='light'] .lo-name {
+  color: #1e3a5f;
+}
+
+.lo-native {
+  @apply flex items-center text-[10px] text-ssm-muted;
+}
+
+html[data-theme='light'] .lo-native {
+  color: #1a1a1a;
+}
+
+/* ── Navigation ──────────────────────────────────────────── */
+
+.nav-sec {
+  @apply text-xs font-bold text-ssm-hint uppercase tracking-widest mb-3 px-2;
+}
+
+html[data-theme='light'] .nav-sec {
+  color: #1a1a1a;
+}
+
+.nav-btn {
+  @apply flex items-center w-full px-4 py-3 mb-2 rounded-xl transition-all duration-300 font-medium cursor-pointer border border-transparent;
+  color: var(--ui-nav-text);
+}
+
+.nav-btn:hover:not(.active) {
+  background: var(--ui-nav-hover-bg);
+  color: var(--ui-nav-hover-text);
+}
+
+.nav-btn.active {
+  @apply bg-ssm-blue-bg text-ssm-blue font-bold shadow-sm border border-ssm-blue/20;
+}
+
+.nav-btn .ico {
+  @apply mr-3 text-lg opacity-80;
+}
+
+/* ── Now-playing card ────────────────────────────────────── */
+
+#np-card {
+  @apply relative;
+  margin-top: auto;
+  min-height: 176px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--ui-np-border);
+  background: var(--ui-np-bg);
+  box-shadow: var(--ui-np-shadow);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Accent line along the top edge. */
+#np-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--ui-np-topline);
+  z-index: 0;
+}
+
+#np-card .np-main,
+#np-card .np-meta-row {
+  position: relative;
+  z-index: 1;
+}
+
+#np-card .np-main {
+  align-items: flex-start;
+  gap: 12px;
+}
+
+#np-card .np-cover {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: var(--ui-np-cover-bg);
+  border-color: var(--ui-np-cover-border);
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+#np-card #np-title {
+  font-size: 14px;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+  white-space: normal;
+  word-break: break-word;
+  line-clamp: 2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+#np-card #np-artist {
+  margin-top: 4px;
+  font-size: 11px;
+  white-space: normal;
+  line-height: 1.3;
+  max-height: 2.6em;
+  overflow: hidden;
+}
+
+html[data-theme='light'] #np-card #np-title,
+html[data-theme='light'] #np-card #np-artist,
+html[data-theme='light'] #np-card #np-state-txt,
+html[data-theme='light'] #np-card #np-lv {
+  color: #1f334c;
+}
+
+#np-card .np-meta-row {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top-color: var(--ui-np-meta-border);
+}
+
+#np-card .np-diff-row {
+  justify-content: flex-start;
+}
+
+#np-card .np-state-row {
+  min-height: 20px;
+  width: 100%;
+}
+
+/* Equalizer bars: flat when idle, dancing while playing, red on error. */
+#np-card .viz-bar {
+  display: grid;
+  grid-template-columns: repeat(18, minmax(0, 1fr));
+  align-items: end;
+  gap: 2px;
+  width: 100%;
+  height: 30px;
+}
+
+#np-card .viz-bar span {
+  height: 2px;
+  min-height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-ssm-blue) 78%, #ffffff 10%), color-mix(in srgb, var(--color-ssm-blue) 92%, #000 8%));
+  opacity: 0.36;
+  transform-origin: bottom center;
+  animation: none;
+}
+
+/* Each bar sets its own --h (height) and --d (period) inline. */
+#np-card.np-state-playing .viz-bar span {
+  height: var(--h, 10px);
+  min-height: 6px;
+  opacity: 0.96;
+  animation: npVizPlaying var(--d, 0.7s) cubic-bezier(0.24, 0.74, 0.26, 1) infinite;
+}
+
+#np-card.np-state-error .viz-bar span {
+  background: #ef4444;
+  opacity: 0.5;
+}
+
+@keyframes npVizPlaying {
+  0% { transform: scaleY(0.42); }
+  20% { transform: scaleY(1); }
+  45% { transform: scaleY(0.58); }
+  70% { transform: scaleY(1.08); }
+  100% { transform: scaleY(0.48); }
+}
+
+/* Screen-reader only status text. */
+#np-card .np-state-a11y {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Narrow screens: the sidebar becomes a top bar ───────── */
+
+@media (max-width: 1100px) {
+  .sidebar {
+    width: 100%;
+    border-right: 0;
+    border-bottom: 1px solid var(--ui-sidebar-border);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .sidebar-top {
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-sec {
+    margin-bottom: 2px;
+    margin-top: 2px;
+    padding-left: 2px;
+  }
+
+  .sidebar .nav-btn {
+    margin-bottom: 0;
+  }
+
+  #np-card {
+    margin-top: 8px;
+    min-height: 132px;
+  }
+}
+
+@media (max-width: 768px) {
+  .top-actions {
+    gap: 8px;
+  }
+
+  .sidebar {
+    padding: 12px;
+  }
+
+  .sidebar .nav-btn {
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+
+  .sidebar .nav-btn .ico {
+    margin-right: 8px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .logo {
+    font-size: 1.28rem;
+  }
+
+  .sidebar .nav-btn {
+    width: 100%;
+  }
+
+  #np-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  #np-card .np-cover {
+    width: 50px;
+    height: 50px;
+  }
+
+  #np-card #np-title {
+    font-size: 12px;
+  }
+
+  #np-card #np-artist {
+    font-size: 10px;
+  }
+}

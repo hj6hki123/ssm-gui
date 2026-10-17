@@ -4,6 +4,24 @@ User-facing notes for each release. The release workflow publishes the section
 that matches the tag as the GitHub release description, so write these for
 players, not for developers.
 
+## [Unreleased]
+
+**Display fixes**
+- Project Sekai **MASTER** badges in the search results now have their color.
+- Settings: humanization values show **blue when set and gray when OFF** (the colors were reversed).
+- The search box's ✕ button only appears once you have typed something.
+- When a jacket image can't be loaded, the "no artwork" placeholder is shown instead of a broken image.
+- Device list buttons no longer flash untranslated labels on startup.
+- Light theme: the highlight on the device card no longer leaves a dark border behind.
+
+**Behavior fixes**
+- Switching from Project Sekai back to BanG Dream with APPEND selected now selects EXPERT instead of nothing.
+- When a song lacks the selected difficulty, the selection always moves to one it has.
+- **Extract Assets** with an empty path asks for the folder instead of saying "select a song".
+- Network errors in Settings and on the play page are now reported instead of silently ignored.
+
+> Internally the GUI frontend was reorganized into small modules and its styles were cleaned up (no visual changes besides the fixes above).
+
 ## [3.7.0] - 2026-09-28
 
 **Core**

@@ -1,0 +1,117 @@
+/* Settings page: saved devices and the tuning sliders. */
+
+/* ── Saved devices ───────────────────────────────────────── */
+
+.dev-row {
+  @apply flex items-center px-4 py-3 mb-2 bg-[#0c0c0e] rounded-xl border border-[#27272a] shadow-inner transition-colors hover:border-[#3f3f46];
+}
+
+.dev-s {
+  @apply font-mono text-[13px] font-bold text-white;
+}
+
+/* The resolution. */
+.dev-row span:nth-of-type(2) {
+  @apply font-mono text-xs text-ssm-muted ml-4;
+}
+
+.dev-empty {
+  font-size: 12px;
+  color: var(--color-ssm-hint);
+}
+
+.btn-del {
+  @apply ml-auto px-3 py-1.5 rounded-lg text-[11px] font-bold tracking-wider uppercase transition-all cursor-pointer;
+  @apply bg-transparent text-ssm-hint border border-transparent;
+}
+
+.btn-del:hover {
+  @apply bg-red-950/40 text-red-400 border-red-900/60;
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.15);
+}
+
+.btn-del:active {
+  @apply scale-95;
+}
+
+html[data-theme='light'] .dev-row {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: transparent;
+}
+
+html[data-theme='light'] .dev-row:hover {
+  border-color: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+html[data-theme='light'] .dev-s {
+  color: #0f172a;
+  font-weight: bold;
+}
+
+html[data-theme='light'] .dev-row span:nth-of-type(2) {
+  color: #475569;
+}
+
+html[data-theme='light'] #dev-list .btn-del {
+  color: #64748b;
+  border-color: transparent;
+}
+
+html[data-theme='light'] #dev-list .btn-del:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+/* ── Tuning rows: label, slider, value ───────────────────── */
+
+.jitter-row {
+  @apply flex items-center mb-3 bg-[#08080a] p-3 px-5 rounded-xl border border-ssm-border/50 shadow-inner gap-4;
+}
+
+html[data-theme='light'] .jitter-row {
+  background: rgba(255, 255, 255, 0.36);
+  border-color: rgba(148, 163, 184, 0.36);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.jitter-label {
+  @apply text-[11px] font-bold text-ssm-muted uppercase tracking-widest w-36 shrink-0;
+}
+
+.jitter-val {
+  @apply text-[13px] font-black w-20 text-right font-mono text-ssm-blue shrink-0 whitespace-nowrap;
+  text-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+}
+
+/* A humanization option that is turned off. */
+.jitter-val.off {
+  @apply text-ssm-hint;
+}
+
+html[data-theme='light'] .jitter-hint {
+  color: #1a1a1a;
+}
+
+/* Great count is typed rather than slid. */
+#inp-grCount {
+  width: 96px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.2);
+  color: inherit;
+}
+
+@media (max-width: 768px) {
+  .jitter-row {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .jitter-label {
+    width: 96px;
+    font-size: 10px;
+  }
+}

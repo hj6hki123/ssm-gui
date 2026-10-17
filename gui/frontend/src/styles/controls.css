@@ -1,0 +1,275 @@
+/* Shared building blocks: cards, buttons, form fields, sliders, keycaps, logs. */
+
+/* ── Cards ───────────────────────────────────────────────── */
+
+.card {
+  @apply rounded-2xl p-6 mb-6 transition-all duration-300;
+  background: var(--ui-glass-bg);
+  backdrop-filter: var(--ui-glass-filter);
+  border: 1px solid var(--ui-glass-border);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.card:hover {
+  background: var(--ui-glass-bg-strong);
+  border-color: var(--ui-glass-border);
+}
+
+/* Briefly flashed to point the user at a card (e.g. a missing device). */
+.card.attention {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+  border-color: #ef4444;
+}
+
+.ct {
+  @apply text-lg font-bold mb-5 flex items-center text-white pb-3;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.05em;
+}
+
+html[data-theme='light'] .ct {
+  color: #10243c;
+}
+
+/* Numbered instruction steps. */
+html[data-theme='light'] .st,
+html[data-theme='light'] .hint {
+  color: #1a1a1a;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+
+.btn {
+  @apply inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-bold transition-all duration-300 cursor-pointer active:scale-95 relative overflow-hidden;
+  background: var(--ui-btn-bg);
+  border: 1px solid var(--ui-btn-border);
+  color: var(--ui-btn-text);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--ui-btn-hover-bg);
+  border-color: var(--ui-btn-hover-border);
+  color: var(--ui-btn-hover-text);
+}
+
+/* Primary action. */
+.btn.pri {
+  @apply bg-blue-600 text-white border-blue-500;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.btn.pri:hover:not(:disabled) {
+  @apply bg-blue-500 border-blue-400;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 6px 20px rgba(59, 130, 246, 0.6);
+}
+
+.btn:disabled {
+  @apply cursor-not-allowed transform-none;
+  background: var(--ui-btn-disabled-bg);
+  border-color: var(--ui-btn-disabled-border);
+  color: var(--ui-btn-disabled-text);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Full-width call to action. */
+.btn-b {
+  @apply w-full py-3.5 text-[15px] mt-4 tracking-[0.1em] uppercase font-black;
+}
+
+/* ── Form fields ─────────────────────────────────────────── */
+
+.field {
+  @apply mb-5;
+}
+
+/* The last field of a card or row. */
+.field.flush {
+  @apply mb-0;
+}
+
+.field label {
+  @apply block text-sm font-semibold text-ssm-muted mb-2;
+}
+
+html[data-theme='light'] .field label {
+  color: #1a1a1a;
+}
+
+input[type="text"],
+input[type="number"] {
+  @apply w-full px-4 py-3 rounded-xl transition-all duration-300 font-medium placeholder-ssm-hint;
+  background: var(--ui-input-bg);
+  border: 1px solid var(--ui-input-border);
+  color: var(--ui-input-text);
+  box-shadow: var(--ui-input-shadow);
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus {
+  @apply outline-none;
+  background: var(--ui-input-focus-bg);
+  border: 1px solid var(--ui-input-focus-border);
+  box-shadow: var(--ui-input-focus-shadow);
+}
+
+html[data-theme='light'] input[type="text"],
+html[data-theme='light'] input[type="number"] {
+  color: #1a1a1a;
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+html[data-theme='light'] input[type="text"]::placeholder,
+html[data-theme='light'] input[type="number"]::placeholder {
+  color: #888888;
+}
+
+/* ── Range slider ────────────────────────────────────────── */
+/* The filled part is drawn by the first background layer, up to --val. */
+
+input[type="range"] {
+  @apply flex-1 h-2 appearance-none cursor-pointer rounded-full m-0;
+  --val: 0%;
+  border: 1px solid #27272a;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+  background-image:
+    linear-gradient(to right, transparent var(--val), #1a1a1e var(--val)),
+    linear-gradient(135deg, #0369a1 0%, #1d4ed8 25%, #4c1d95 50%, #6d28d9 75%, #0284c7 100%);
+  background-size: 100% 100%, 600% 100%;
+  animation: auroraFlow 12s ease-in-out infinite alternate;
+}
+
+@keyframes auroraFlow {
+  0%   { background-position: 0% 0%, 0% 50%; }
+  100% { background-position: 0% 0%, 100% 50%; }
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  @apply w-full h-2 rounded-full bg-transparent;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  @apply appearance-none w-3.5 h-5 bg-blue-400 rounded-[3px] relative z-10;
+  margin-top: -6px;
+  border: 1px solid #ffffff;
+  box-shadow: 0 0 10px rgba(96,165,250,0.8), inset 0 0 4px rgba(255,255,255,0.8);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+  @apply bg-blue-300 scale-110;
+  box-shadow: 0 0 15px rgba(96,165,250,1), inset 0 0 6px rgba(255,255,255,1);
+}
+
+input[type="range"]::-moz-range-track {
+  @apply w-full h-2 rounded-full bg-transparent;
+}
+
+input[type="range"]::-moz-range-progress {
+  @apply h-2 rounded-l-full;
+  background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 25%, #4c1d95 50%, #6d28d9 75%, #0284c7 100%);
+  background-size: 600% 100%;
+  animation: auroraFlow 12s ease-in-out infinite alternate;
+}
+
+input[type="range"]::-moz-range-thumb {
+  @apply appearance-none w-3.5 h-5 bg-blue-400 rounded-[3px] border border-white cursor-pointer;
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.8);
+}
+
+html[data-theme='light'] input[type="range"] {
+  border-color: rgba(148, 163, 184, 0.45);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.75);
+  background-image:
+    linear-gradient(to right, transparent var(--val), rgba(241, 245, 249, 0.95) var(--val)),
+    linear-gradient(135deg, #0ea5e9 0%, #2563eb 25%, #7c3aed 50%, #ec4899 75%, #0ea5e9 100%);
+}
+
+html[data-theme='light'] input[type="range"]::-webkit-slider-thumb {
+  @apply bg-blue-500;
+  border-color: #ffffff;
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.45), inset 0 0 4px rgba(255, 255, 255, 0.95);
+}
+
+html[data-theme='light'] input[type="range"]::-moz-range-progress {
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 25%, #7c3aed 50%, #ec4899 75%, #0ea5e9 100%);
+  background-size: 600% 100%; /* reset by the shorthand above */
+}
+
+html[data-theme='light'] input[type="range"]::-moz-range-track {
+  background: rgba(241, 245, 249, 0.92);
+}
+
+/* ── Keycap ──────────────────────────────────────────────── */
+
+kbd {
+  @apply inline-block px-2 py-0.5 border border-[#444] rounded text-white font-bold text-[11px] min-w-[24px] text-center;
+  box-shadow: 0 2px 0 #000;
+  background: linear-gradient(180deg, #333 0%, #2a2a2d 100%);
+}
+
+/* ── Log terminal ────────────────────────────────────────── */
+
+.log {
+  @apply mt-6 font-mono text-xs p-4 rounded-xl h-48 overflow-y-auto leading-relaxed;
+  background: var(--ui-log-bg); /* fallback without color-mix() */
+  background: color-mix(in srgb, var(--ui-log-bg) 72%, transparent);
+  border: 1px solid var(--ui-log-border);
+  box-shadow: var(--ui-log-shadow);
+  color: var(--ui-log-text);
+  isolation: isolate;
+  backdrop-filter: var(--ui-glass-filter-soft);
+}
+
+.ll.info {
+  color: #3b82f6;
+}
+
+.ll.ok {
+  color: #00ff41;
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+}
+
+.ll.err {
+  color: #ef4444;
+  text-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 14px;
+    border-radius: 16px;
+    margin-bottom: 14px;
+  }
+
+  .ct {
+    font-size: 0.96rem;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+}
+
+@media (max-width: 520px) {
+  .field label {
+    font-size: 11px;
+  }
+
+  input[type="text"],
+  input[type="number"] {
+    padding: 10px 12px;
+  }
+
+  .log {
+    height: 140px;
+    padding: 10px;
+  }
+}

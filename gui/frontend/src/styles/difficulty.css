@@ -1,0 +1,262 @@
+/* Everything colored by difficulty: the picker buttons on the song page and
+   the badges (now-playing cards, search results). APPEND uses a blue→pink
+   gradient instead of a single color. */
+
+/* ── Difficulty picker ───────────────────────────────────── */
+
+.diff-row {
+  @apply flex flex-wrap gap-2;
+}
+
+.db {
+  @apply flex-1 min-w-[64px] py-2 px-1 rounded-xl border-2 font-black text-[10px] tracking-tighter text-center cursor-pointer transition-all duration-300 active:scale-95 uppercase;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: var(--ui-glass-filter-chip);
+}
+
+/* Not available for the selected song. Overrides every color variant. */
+.db.dis {
+  @apply opacity-10 cursor-not-allowed active:scale-100 grayscale;
+  background: transparent;
+  border-color: #333 !important;
+  text-shadow: none !important;
+}
+
+.db.easy {
+  @apply border-[#5ba3e0]/30 text-[#5ba3e0]/60;
+}
+
+.db.normal {
+  @apply border-[#7ab84a]/30 text-[#7ab84a]/60;
+}
+
+.db.hard {
+  @apply border-[#d4921e]/30 text-[#d4921e]/60;
+}
+
+.db.expert {
+  @apply border-[#e06060]/30 text-[#e06060]/60;
+}
+
+.db.special {
+  @apply border-[#9b95e0]/30 text-[#9b95e0]/60;
+}
+
+.db.append {
+  border-color: transparent;
+  color: rgba(214, 228, 255, 0.86);
+  background:
+    linear-gradient(145deg, rgba(0, 0, 0, 0.45), rgba(18, 20, 28, 0.52)) padding-box,
+    linear-gradient(135deg, rgba(79, 143, 247, 0.62), rgba(242, 110, 201, 0.66)) border-box;
+}
+
+.db:hover:not(.dis):not(.active) {
+  @apply bg-white/5;
+}
+
+.db.easy:hover:not(.dis):not(.active) {
+  @apply border-[#5ba3e0] text-[#5ba3e0];
+}
+
+.db.normal:hover:not(.dis):not(.active) {
+  @apply border-[#7ab84a] text-[#7ab84a];
+}
+
+.db.hard:hover:not(.dis):not(.active) {
+  @apply border-[#d4921e] text-[#d4921e];
+}
+
+.db.expert:hover:not(.dis):not(.active) {
+  @apply border-[#e06060] text-[#e06060];
+}
+
+.db.special:hover:not(.dis):not(.active) {
+  @apply border-[#9b95e0] text-[#9b95e0];
+}
+
+.db.append:hover:not(.dis):not(.active) {
+  border-color: transparent;
+  color: #f2f6ff;
+  background:
+    linear-gradient(145deg, rgba(16, 22, 36, 0.75), rgba(34, 18, 42, 0.72)) padding-box,
+    linear-gradient(135deg, rgba(97, 166, 255, 0.9), rgba(251, 123, 213, 0.92)) border-box;
+}
+
+/* Selected: filled with a neon glow. */
+.db.active {
+  @apply scale-100 text-white;
+}
+
+.db.easy.active {
+  background: #0c2a45;
+  border-color: #5ba3e0;
+  box-shadow: 0 0 15px rgba(91, 163, 224, 0.5), inset 0 0 10px rgba(91, 163, 224, 0.3);
+  text-shadow: 0 0 8px #5ba3e0;
+}
+
+.db.normal.active {
+  background: #192e09;
+  border-color: #7ab84a;
+  box-shadow: 0 0 15px rgba(122, 184, 74, 0.5), inset 0 0 10px rgba(122, 184, 74, 0.3);
+  text-shadow: 0 0 8px #7ab84a;
+}
+
+.db.hard.active {
+  background: #2c1e04;
+  border-color: #d4921e;
+  box-shadow: 0 0 15px rgba(212, 146, 30, 0.5), inset 0 0 10px rgba(212, 146, 30, 0.3);
+  text-shadow: 0 0 8px #d4921e;
+}
+
+.db.expert.active {
+  background: #2c0909;
+  border-color: #e06060;
+  box-shadow: 0 0 15px rgba(224, 96, 96, 0.5), inset 0 0 10px rgba(224, 96, 96, 0.3);
+  text-shadow: 0 0 8px #e06060;
+}
+
+.db.special.active {
+  background: #1c1a42;
+  border-color: #9b95e0;
+  box-shadow: 0 0 15px rgba(155, 149, 224, 0.5), inset 0 0 10px rgba(155, 149, 224, 0.3);
+  text-shadow: 0 0 8px #9b95e0;
+}
+
+.db.append.active {
+  background: linear-gradient(135deg, #4f8ff7 0%, #f26ec9 100%);
+  border-color: #b9c9ff;
+  box-shadow: 0 0 15px rgba(114, 154, 255, 0.4), inset 0 0 10px rgba(255, 122, 210, 0.28);
+  text-shadow: 0 0 8px rgba(228, 236, 255, 0.85);
+}
+
+.song-setup .diff-row {
+  @apply gap-1.5;
+}
+
+.song-setup .db {
+  @apply min-w-[54px] py-1.5 text-[9px] rounded-lg;
+}
+
+/* Light theme: frosted chips, solid gradient when selected. */
+html[data-theme='light'] .db {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.45), rgba(236, 246, 255, 0.28));
+  backdrop-filter: var(--ui-glass-filter-chip-light);
+}
+
+html[data-theme='light'] .db:not(.active) {
+  opacity: 0.84;
+}
+
+html[data-theme='light'] .db.active {
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7), 0 10px 22px rgba(15, 23, 42, 0.24);
+}
+
+html[data-theme='light'] .db.easy { @apply border-[#5ba3e0]/50 text-[#2f74ad]; }
+html[data-theme='light'] .db.normal { @apply border-[#7ab84a]/50 text-[#4c8d20]; }
+html[data-theme='light'] .db.hard { @apply border-[#d4921e]/55 text-[#9c6610]; }
+html[data-theme='light'] .db.expert { @apply border-[#e06060]/50 text-[#a73e3e]; }
+html[data-theme='light'] .db.special { @apply border-[#9b95e0]/55 text-[#6259c8]; }
+
+html[data-theme='light'] .db.append {
+  border-color: transparent;
+  color: #5d4c90;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.52), rgba(240, 248, 255, 0.38)) padding-box,
+    linear-gradient(135deg, rgba(88, 168, 255, 0.62), rgba(255, 122, 210, 0.66)) border-box;
+}
+
+html[data-theme='light'] .db.append:hover:not(.dis):not(.active) {
+  border-color: transparent;
+  color: #4f8ff7;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.65), rgba(250, 252, 255, 0.45)) padding-box,
+    linear-gradient(135deg, rgba(88, 168, 255, 0.75), rgba(255, 122, 210, 0.75)) border-box;
+}
+
+html[data-theme='light'] .db.easy.active {
+  background: linear-gradient(135deg, rgba(91, 163, 224, 0.9), rgba(66, 125, 187, 0.82));
+  box-shadow: 0 0 0 1px rgba(91, 163, 224, 0.4), 0 8px 20px rgba(91, 163, 224, 0.28);
+}
+
+html[data-theme='light'] .db.normal.active {
+  background: linear-gradient(135deg, rgba(122, 184, 74, 0.92), rgba(90, 146, 46, 0.84));
+  box-shadow: 0 0 0 1px rgba(122, 184, 74, 0.4), 0 8px 20px rgba(122, 184, 74, 0.28);
+}
+
+html[data-theme='light'] .db.hard.active {
+  background: linear-gradient(135deg, rgba(212, 146, 30, 0.92), rgba(176, 113, 8, 0.84));
+  box-shadow: 0 0 0 1px rgba(212, 146, 30, 0.4), 0 8px 20px rgba(212, 146, 30, 0.28);
+}
+
+html[data-theme='light'] .db.expert.active {
+  background: linear-gradient(135deg, rgba(224, 96, 96, 0.92), rgba(191, 55, 55, 0.84));
+  box-shadow: 0 0 0 1px rgba(224, 96, 96, 0.4), 0 8px 20px rgba(224, 96, 96, 0.28);
+}
+
+html[data-theme='light'] .db.special.active {
+  background: linear-gradient(135deg, rgba(155, 149, 224, 0.94), rgba(111, 105, 198, 0.86));
+  box-shadow: 0 0 0 1px rgba(155, 149, 224, 0.42), 0 8px 20px rgba(155, 149, 224, 0.3);
+}
+
+html[data-theme='light'] .db.append.active {
+  background: linear-gradient(135deg, rgba(88, 168, 255, 0.94), rgba(255, 122, 210, 0.9));
+  box-shadow: 0 0 0 1px rgba(120, 170, 255, 0.45), 0 8px 20px rgba(207, 79, 164, 0.24);
+}
+
+/* ── Badges ──────────────────────────────────────────────── */
+
+.np-diff {
+  @apply px-2 py-0.5 rounded text-[10px] font-black tracking-wider;
+}
+
+html[data-theme='light'] .np-diff {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  color: #1f334c;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.d-easy {
+  @apply bg-diff-easy-bg text-diff-easy;
+}
+
+.d-normal {
+  @apply bg-diff-normal-bg text-diff-normal;
+}
+
+.d-hard {
+  @apply bg-diff-hard-bg text-diff-hard;
+}
+
+.d-expert {
+  @apply bg-diff-expert-bg text-diff-expert;
+}
+
+.d-special {
+  @apply bg-diff-special-bg text-diff-special;
+}
+
+.d-append {
+  background: linear-gradient(135deg, rgba(79, 143, 247, 0.25), rgba(242, 110, 201, 0.28));
+  color: #eaf0ff;
+}
+
+@media (max-width: 768px) {
+  .diff-row {
+    gap: 6px;
+  }
+
+  .db {
+    min-width: calc(33.333% - 6px);
+    flex: 0 0 calc(33.333% - 6px);
+  }
+}
+
+@media (max-width: 520px) {
+  .db {
+    min-width: calc(50% - 6px);
+    flex: 0 0 calc(50% - 6px);
+  }
+}

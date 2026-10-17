@@ -1,0 +1,282 @@
+/* Song page: compact layout, mode/backend options, song search and dropdowns. */
+
+.song-setup .pg-title {
+  @apply mb-5;
+}
+
+.song-top-grid {
+  @apply grid grid-cols-1 gap-4;
+}
+
+.song-input-grid {
+  @apply grid grid-cols-1 gap-3;
+}
+
+.song-setup .song-card,
+.song-setup .song-search-card {
+  @apply p-4 mb-4;
+}
+
+.song-setup .mode-card {
+  @apply flex flex-col;
+}
+
+.song-setup .ct {
+  @apply text-base mb-3 pb-2;
+}
+
+.song-setup .field:not(.flush) {
+  @apply mb-3;
+}
+
+.song-setup .field label {
+  @apply text-xs mb-1.5 uppercase tracking-[0.08em] text-ssm-hint;
+}
+
+/* The serial field's label shares its row with the Auto Detect button. */
+.song-setup .field.serial-field {
+  @apply mb-4;
+}
+
+.song-setup .serial-field label {
+  @apply mb-0;
+}
+
+.song-setup .btn-b {
+  @apply mt-2 py-3;
+  /* Above the search dropdown's card when they overlap. */
+  position: relative;
+  z-index: 20;
+}
+
+.song-setup #song-log {
+  @apply mt-3 h-36;
+}
+
+@media (min-width: 960px) {
+  .song-top-grid {
+    @apply grid-cols-2;
+  }
+
+  .song-input-grid {
+    @apply grid-cols-2;
+  }
+}
+
+/* ── Option buttons (game mode, backend, rotation) ───────── */
+
+.bg {
+  @apply grid grid-cols-2 gap-3 mb-4;
+}
+
+.bc {
+  @apply p-3 rounded-xl border-[1.5px] border-ssm-border cursor-pointer transition-all duration-300 text-center bg-transparent hover:border-ssm-muted/40 hover:-translate-y-0.5 active:scale-[0.99];
+}
+
+.bc.active {
+  @apply border-ssm-blue bg-ssm-blue-bg;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
+}
+
+html[data-theme='light'] .bc {
+  border-color: rgba(50, 84, 130, 0.4);
+}
+
+html[data-theme='light'] .bc.active {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.15);
+}
+
+.bcn {
+  @apply font-bold text-sm mb-0.5 text-white;
+}
+
+html[data-theme='light'] .bcn {
+  color: #10243c;
+}
+
+.bcs {
+  @apply text-[11px] text-ssm-muted font-medium;
+}
+
+html[data-theme='light'] .bcs {
+  color: #1a1a1a;
+}
+
+.song-setup .bg {
+  @apply mb-3 gap-2;
+}
+
+.song-setup .mode-bg {
+  @apply grid-cols-1 flex-1 mb-0;
+  align-content: space-evenly;
+}
+
+.song-setup .mode-bg .bc {
+  @apply p-3;
+}
+
+.song-setup .bc {
+  @apply p-2.5 rounded-lg;
+}
+
+.song-setup .bcn {
+  @apply text-[13px] mb-0;
+}
+
+.song-setup .bcs {
+  @apply text-[10px];
+}
+
+.song-setup .orient-btn {
+  @apply p-3;
+}
+
+.song-setup .orient-btn .bcs {
+  @apply text-sm font-bold;
+}
+
+/* Rotation only applies to HID; dimmed for adb. */
+#orient-wrap.muted {
+  opacity: 0.4;
+}
+
+html[data-theme='light'] #hid-warn-box {
+  background: linear-gradient(135deg, rgba(254, 226, 226, 0.86), rgba(254, 242, 242, 0.78));
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #b91c1c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+html[data-theme='light'] .auto-detect-btn {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(241, 245, 255, 0.9));
+  border-color: rgba(37, 99, 235, 0.3);
+  color: #2563eb;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.1);
+}
+
+html[data-theme='light'] .auto-detect-btn:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.92), rgba(37, 99, 235, 0.9));
+  border-color: rgba(37, 99, 235, 0.55);
+  color: #ffffff;
+}
+
+/* ── Selected song ───────────────────────────────────────── */
+
+.sel-bar {
+  @apply flex items-center gap-3 bg-ssm-blue-bg p-3 rounded-xl border border-ssm-blue/30 text-white mb-4;
+  backdrop-filter: var(--ui-glass-filter-strong);
+}
+
+.song-setup .sel-bar {
+  @apply mb-3 p-2.5 rounded-lg;
+}
+
+.sel-bar .sb-title {
+  color: #eef5ff;
+}
+
+html[data-theme='light'] .sel-bar .sb-title {
+  color: #1d4ed8;
+  text-shadow: 0 0 10px rgba(37, 99, 235, 0.16);
+}
+
+/* ── Dropdowns (search results, device serials) ──────────── */
+
+/* Keep the open dropdown above the cards below it. */
+.song-search-card {
+  position: relative;
+  z-index: 220;
+  overflow: visible;
+}
+
+.song-search-card .sw {
+  position: relative;
+  z-index: 260;
+}
+
+.drop {
+  @apply absolute top-full left-0 right-0 mt-2 rounded-xl max-h-60 overflow-y-auto hidden;
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+}
+
+.drop.open {
+  @apply block animate-[fadeIn_0.2s_ease-out_forwards];
+}
+
+html[data-theme='light'] .drop {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.di {
+  @apply flex items-center px-4 py-3 cursor-pointer border-b border-ssm-border last:border-0 transition-colors;
+}
+
+.di:hover {
+  background: var(--ui-drop-item-hover);
+}
+
+/* Highlighted with the arrow keys. */
+.di.hi {
+  @apply border-l-4 border-l-ssm-blue;
+  background: var(--ui-drop-item-hover);
+}
+
+.di-id {
+  @apply text-xs font-mono text-ssm-muted w-12;
+}
+
+/* Fills the row so the difficulty tags sit at the right edge. */
+.di-info {
+  @apply flex-1 min-w-0;
+}
+
+.di-title {
+  @apply font-bold text-sm text-white;
+}
+
+.di-band {
+  @apply text-xs text-ssm-muted mt-0.5;
+}
+
+html[data-theme='light'] .di-title {
+  color: #10243c;
+}
+
+html[data-theme='light'] .di-band {
+  color: #1a1a1a;
+}
+
+.di-diffs {
+  @apply flex items-center gap-1.5 flex-shrink-0 ml-auto;
+}
+
+.di-d {
+  @apply px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider border border-transparent;
+}
+
+/* Device serial dropdown: serial left, resolution right. */
+.dev-drop-style .di-id {
+  @apply text-[11px] font-mono text-ssm-hint flex-none;
+}
+
+.dev-drop-style .di-info {
+  @apply flex-1 text-right;
+}
+
+.dev-drop-style .di-title {
+  @apply font-bold text-sm text-white font-mono;
+}
+
+@media (max-width: 520px) {
+  .song-setup .song-input-grid,
+  .song-top-grid,
+  .bg {
+    grid-template-columns: 1fr;
+  }
+}

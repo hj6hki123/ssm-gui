@@ -8,7 +8,7 @@
   <title>SSM — Star Stone Miner</title>
 </head>
 
-<body class="antialiased">
+<body>
   <div class="layout">
     <div class="sidebar">
       <div class="sidebar-top">
@@ -43,24 +43,22 @@
         <span class="ico">📦</span><span data-i18n="nav.extract">Extract Assets</span>
       </button>
 
-      <div
-        class="np-card mt-auto bg-[#18181b] p-3 rounded-xl border border-ssm-border flex flex-col shadow-lg relative overflow-hidden"
-        id="np-card" style="display:none">
+      <div id="np-card" hidden>
 
-        <div class="np-main flex items-center gap-3">
-          <div class="np-cover w-12 h-12 bg-[#121212] rounded-md overflow-hidden shrink-0 border border-ssm-border/50 flex items-center justify-center shadow-sm">
+        <div class="np-main flex">
+          <div class="np-cover overflow-hidden shrink-0 border flex items-center justify-center">
             <img id="np-img" alt="" class="w-full h-full object-cover">
-            <div class="text-ssm-muted font-bold text-lg" id="np-no" style="display:none">♪</div>
+            <div class="flex text-ssm-muted font-bold text-lg" id="np-no" hidden>♪</div>
           </div>
           <div class="np-text flex-1 min-w-0">
-            <div class="text-[13px] font-bold text-white leading-tight" id="np-title">—</div>
-            <div class="text-[11px] text-ssm-muted mt-1" id="np-artist"></div>
+            <div class="font-bold text-white" id="np-title">—</div>
+            <div class="text-ssm-muted" id="np-artist"></div>
           </div>
         </div>
 
-        <div class="np-meta-row mt-3 pt-2 border-t border-[#333333]">
+        <div class="np-meta-row border-t border-[#333333]">
           <div class="np-diff-row flex items-center gap-2">
-            <span class="np-diff !px-1.5 !py-0.5" id="np-diff"></span>
+            <span class="np-diff" id="np-diff"></span>
             <span class="text-[11px] font-mono font-bold text-ssm-hint" id="np-lv"></span>
           </div>
           <div class="np-state-row flex items-center mt-2">
@@ -102,7 +100,7 @@
             </div>
           </div>
           <div class="card song-card">
-            <div class="ct flex items-center justify-between">
+            <div class="ct justify-between">
               <span data-i18n="song.backend">Backend & Connection</span>
               <div id="hid-warn-box" data-i18n="song.backend.hid_warn"
                 class="text-[10px] bg-red-950/20 text-red-400 p-2.5 rounded-lg border border-red-900/30 leading-relaxed font-medium">
@@ -118,9 +116,9 @@
               </div>
             </div>
 
-            <div class="field !mb-4">
+            <div class="field serial-field">
               <div class="flex items-end justify-between mb-2">
-                <label class="!mb-0" data-i18n="song.serial.label">Device serial</label>
+                <label data-i18n="song.serial.label">Device serial</label>
                 <button
                   class="auto-detect-btn text-[10px] bg-[#27272a] text-blue-400 hover:bg-blue-600 hover:text-white px-2 py-1 rounded border border-[#3f3f46] transition-all font-bold flex items-center gap-1 active:scale-95"
                   data-action="autoDetectDevice">
@@ -129,7 +127,7 @@
               </div>
 
               <div class="sw relative">
-                <input type="text" id="dev-serial" autocomplete="off" class="pr-10">
+                <input type="text" id="dev-serial" autocomplete="off">
                 <button
                   class="sc absolute right-3 top-1/2 -translate-y-1/2 text-ssm-muted hover:text-white transition-colors"
                   id="btn-dev-drop" data-action="toggleDevDrop">▾</button>
@@ -137,14 +135,14 @@
               </div>
             </div>
 
-            <div id="orient-wrap" class="field !mb-0">
+            <div id="orient-wrap" class="field flush">
               <label data-i18n="song.orient">Screen rotation (HID only)</label>
               <div class="grid grid-cols-2 gap-3 mt-2">
-                <button class="bc active !p-3 flex items-center justify-center" id="ol" data-action="setOrient" data-arg="left">
-                  <div class="bcs !text-sm !font-bold" data-i18n="song.orient.left">↺ CCW</div>
+                <button class="bc orient-btn active flex items-center justify-center" id="ol" data-action="setOrient" data-arg="left">
+                  <div class="bcs" data-i18n="song.orient.left">↺ CCW</div>
                 </button>
-                <button class="bc !p-3 flex items-center justify-center" id="or" data-action="setOrient" data-arg="right">
-                  <div class="bcs !text-sm !font-bold" data-i18n="song.orient.right">↻ CW</div>
+                <button class="bc orient-btn flex items-center justify-center" id="or" data-action="setOrient" data-arg="right">
+                  <div class="bcs" data-i18n="song.orient.right">↻ CW</div>
                 </button>
               </div>
             </div>
@@ -153,9 +151,7 @@
 
         <div class="card song-search-card">
           <div class="ct" data-i18n="song.search">Song Search</div>
-          <div
-            class="sel-bar mb-4 flex items-center gap-3 bg-ssm-blue-bg p-3 rounded-xl border border-ssm-blue/30 text-white"
-            id="sel-bar" style="display: none;">
+          <div class="sel-bar" id="sel-bar" hidden>
             <span class="sb-id text-ssm-blue font-mono font-bold" id="sb-id"></span>
             <span class="sb-title flex-1 font-bold" id="sb-title"></span>
             <button class="sb-x text-ssm-hint hover:text-white transition-colors" data-action="clearSong">✕</button>
@@ -163,12 +159,12 @@
 
           <div class="field">
             <label data-i18n="song.search.label">Search by name</label>
-            <div class="sw relative">
+            <div class="sw">
               <input type="text" id="q" data-i18n-placeholder="song.search.placeholder" autocomplete="off"
                 data-oninput="onQInput" data-onkeydown="onQKey" data-onfocus="onQFocus">
               <button
                 class="sc absolute right-3 top-1/2 -translate-y-1/2 text-ssm-muted hover:text-white transition-colors"
-                id="sc" data-action="clearQ">✕</button>
+                id="sc" data-action="clearQ" hidden>✕</button>
               <div class="drop" id="drop"></div>
             </div>
           </div>
@@ -186,7 +182,7 @@
             </div>
           </div>
 
-          <div class="field !mb-0">
+          <div class="field flush">
             <label data-i18n="song.diff">Difficulty</label>
             <div class="diff-row">
               <button class="db easy" data-action="setDiff" data-arg="0">EASY</button>
@@ -207,7 +203,7 @@
         <div class="card">
           <div class="ct" data-i18n="settings.device">Device Management</div>
           <div id="dev-list">
-            <div style="font-size:12px;color:var(--color-ssm-hint)" data-i18n="device.loading">Loading...</div>
+            <div class="dev-empty" data-i18n="device.loading">Loading...</div>
           </div>
         </div>
 
@@ -220,11 +216,11 @@
             <div class="st text-sm text-ssm-muted" data-i18n="device.step1">Hold phone in portrait.</div>
           </div>
           <div class="row grid grid-cols-3 gap-4 mb-4">
-            <div class="field !mb-0"><label data-i18n="device.serial">Serial</label><input type="text" id="dc-s"
+            <div class="field flush"><label data-i18n="device.serial">Serial</label><input type="text" id="dc-s"
                 placeholder="R58M1234ABC"></div>
-            <div class="field !mb-0"><label data-i18n="device.width">Width (px)</label><input type="number" id="dc-w"
+            <div class="field flush"><label data-i18n="device.width">Width (px)</label><input type="number" id="dc-w"
                 placeholder="1080" min="1"></div>
-            <div class="field !mb-0"><label data-i18n="device.height">Height (px)</label><input type="number" id="dc-h"
+            <div class="field flush"><label data-i18n="device.height">Height (px)</label><input type="number" id="dc-h"
                 placeholder="2340" min="1"></div>
           </div>
           <button class="btn pri" data-action="saveDevice" data-i18n="device.save">Save</button>
@@ -236,27 +232,27 @@
           <div class="jitter-row">
             <span class="jitter-label" data-i18n="jitter.timing">Timing ±ms</span>
             <input type="range" id="sld-timing" min="0" max="200" step="1" value="0" data-oninput="onJitter" data-arg="timing">
-            <span class="jitter-val text-ssm-hint" id="val-timing">OFF</span>
+            <span class="jitter-val off" id="val-timing">OFF</span>
           </div>
           <div class="jitter-row">
             <span class="jitter-label" data-i18n="jitter.position">Position ±%</span>
             <input type="range" id="sld-position" min="0" max="10" step="1" value="0" data-oninput="onJitter" data-arg="position">
-            <span class="jitter-val text-ssm-hint" id="val-position">OFF</span>
+            <span class="jitter-val off" id="val-position">OFF</span>
           </div>
           <div class="jitter-row">
             <span class="jitter-label" data-i18n="jitter.tapDur">Tap duration ±ms</span>
             <input type="range" id="sld-tapDur" min="0" max="40" step="1" value="0" data-oninput="onJitter" data-arg="tapDur">
-            <span class="jitter-val text-ssm-hint" id="val-tapDur">OFF</span>
+            <span class="jitter-val off" id="val-tapDur">OFF</span>
           </div>
           <div class="jitter-row">
             <span class="jitter-label" data-i18n="jitter.grOffset">Great Offset ms</span>
             <input type="range" id="sld-grOffset" min="10" max="200" step="5" value="75" data-oninput="onJitter" data-arg="grOffset">
-            <span class="jitter-val text-ssm-hint" id="val-grOffset">75 ms</span>
+            <span class="jitter-val" id="val-grOffset">75 ms</span>
           </div>
           <div class="jitter-row">
             <span class="jitter-label" data-i18n="jitter.grCount">Great Count</span>
-            <input type="number" id="inp-grCount" min="0" max="300" step="1" value="0" data-oninput="onGreatCountInput" style="width:96px;padding:4px 6px;border-radius:6px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.2);color:var(--txt)">
-            <span class="jitter-val text-ssm-hint" id="val-grCount">OFF</span>
+            <input type="number" id="inp-grCount" min="0" max="300" step="1" value="0" data-oninput="onGreatCountInput">
+            <span class="jitter-val off" id="val-grCount">OFF</span>
           </div>
           <div class="jitter-hint text-xs text-ssm-hint mt-2" data-i18n="jitter.hint"></div>
         </div>
@@ -268,36 +264,36 @@
             <span class="jitter-label" data-i18n="settings.tapDuration">Tap Duration (ms)</span>
             <input type="range" id="sld-tapDuration" min="1" max="50" step="1" value="10"
               data-oninput="onAdvanced" data-arg="tapDuration">
-            <span class="jitter-val !text-ssm-blue" id="val-tapDuration">10</span>
+            <span class="jitter-val" id="val-tapDuration">10</span>
           </div>
           <div class="jitter-row">
             <span class="jitter-label" data-i18n="settings.flickDuration">Flick Duration (ms)</span>
             <input type="range" id="sld-flickDuration" min="5" max="120" step="1" value="60"
               data-oninput="onAdvanced" data-arg="flickDuration">
-            <span class="jitter-val !text-ssm-blue" id="val-flickDuration">60</span>
+            <span class="jitter-val" id="val-flickDuration">60</span>
           </div>
           <div class="jitter-row">
             <span class="jitter-label" data-i18n="settings.flickReportInterval">Flick Report Interval (ms)</span>
             <input type="range" id="sld-flickReportInterval" min="1" max="20" step="1" value="5"
               data-oninput="onAdvanced" data-arg="flickReportInterval">
-            <span class="jitter-val !text-ssm-blue" id="val-flickReportInterval">5</span>
+            <span class="jitter-val" id="val-flickReportInterval">5</span>
           </div>
           <div class="jitter-row">
             <span class="jitter-label" data-i18n="settings.slideReportInterval">Slide Report Interval (ms)</span>
             <input type="range" id="sld-slideReportInterval" min="1" max="30" step="1" value="10"
               data-oninput="onAdvanced" data-arg="slideReportInterval">
-            <span class="jitter-val !text-ssm-blue" id="val-slideReportInterval">10</span>
+            <span class="jitter-val" id="val-slideReportInterval">10</span>
           </div>
           <div class="jitter-row">
             <span class="jitter-label" data-i18n="settings.flickFactor">Flick Factor</span>
             <input type="range" id="sld-flickFactor" min="5" max="50" step="1" value="20"
               data-oninput="onAdvanced" data-arg="flickFactor">
-            <span class="jitter-val !text-ssm-blue" id="val-flickFactor">0.20</span>
+            <span class="jitter-val" id="val-flickFactor">0.20</span>
           </div>
           <div class="jitter-row">
             <span class="jitter-label" data-i18n="settings.flickPow">Flick Curve Exponent</span>
             <input type="range" id="sld-flickPow" min="5" max="30" step="1" value="10" data-oninput="onAdvanced" data-arg="flickPow">
-            <span class="jitter-val !text-ssm-blue" id="val-flickPow">1.0</span>
+            <span class="jitter-val" id="val-flickPow">1.0</span>
           </div>
           <div class="text-center mt-4">
             <button class="btn" data-action="resetAdvanced" data-i18n="settings.defaults">Reset to Defaults</button>
@@ -314,13 +310,13 @@
             <div data-i18n="play.none">No song loaded.</div>
           </div>
 
-          <div id="pn-loaded" style="display:none">
+          <div id="pn-loaded" hidden>
 
             <div class="pd-info">
               <div class="pd-jacket-wrap" id="pn-jacket-wrap">
                 <div class="pd-jacket">
                   <img id="pn-img" alt="">
-                  <div class="pn-no text-6xl font-bold text-ssm-muted" id="pn-no" style="display:none">♪</div>
+                  <div class="pn-no flex text-6xl font-bold text-ssm-muted" id="pn-no" hidden>♪</div>
                 </div>
               </div>
               <div class="pd-meta">
@@ -358,7 +354,7 @@
                     <span data-i18n="play.offset.title">Offset Adjustment</span>
 
                   </div>
-                  <button class="text-blue-400 hover:text-blue-300 font-bold text-[11px]" data-action="resetOff"
+                  <button data-action="resetOff"
                     data-i18n="play.offset.reset">Reset</button>
                 </div>
                 <div class="pd-offset-bar">
@@ -375,11 +371,11 @@
                   <button data-action="adj" data-arg="100" title="+100ms">»</button>
                 </div>
                 <div class="ins-group ins-group-hints">
-                  <div class="hidden md:flex gap-1 items-center ml-2">
+                  <div class="ml-2">
                     <kbd>←</kbd><kbd>→</kbd> <span class="text-[9px]">Offset</span>
                   </div>
-                  <span><kbd class="!bg-transparent !shadow-none">Shift</kbd> ±50ms</span>
-                  <span><kbd class="!bg-transparent !shadow-none">Ctrl</kbd> ±100ms</span>
+                  <span><kbd>Shift</kbd> ±50ms</span>
+                  <span><kbd>Ctrl</kbd> ±100ms</span>
                 </div>
               </div>
             </div>

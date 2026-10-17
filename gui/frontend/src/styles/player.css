@@ -1,0 +1,616 @@
+/* Play page: the player deck (jacket, title, status), offset controls,
+   Start / Restart, keyboard hints and the status dot. --jacket-color (set
+   from the difficulty, see ui/accent.js) tints the glows. */
+
+/* ── Deck ────────────────────────────────────────────────── */
+
+.player-deck {
+  @apply rounded-2xl shadow-2xl mb-6;
+  position: relative;
+  overflow: hidden;
+  background: var(--ui-glass-bg);
+  backdrop-filter: var(--ui-glass-filter);
+  border: 1px solid var(--ui-glass-border);
+  transition: box-shadow 0.8s ease;
+}
+
+/* Ambient glow in the difficulty color. */
+.player-deck::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 60% at 20% 30%,
+    color-mix(in srgb, var(--jacket-color, #3b82f6) 12%, transparent),
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+  transition: background 1s ease;
+}
+
+html[data-theme='light'] .player-deck {
+  background: rgba(255, 255, 255, 0.34);
+  border-color: rgba(148, 163, 184, 0.34);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+/* Sections sit above the glow. */
+.pd-info,
+.pd-offset-sec,
+.pd-actions-sec,
+.pd-none {
+  position: relative;
+  z-index: 1;
+}
+
+.pd-none {
+  @apply py-20 text-center text-ssm-muted bg-[#09090b]/50;
+}
+
+html[data-theme='light'] .pd-none {
+  background: rgba(255, 255, 255, 0.22);
+  color: #5f6f86;
+}
+
+/* ── Song info: jacket, title, badges ────────────────────── */
+
+.pd-info {
+  @apply flex items-center gap-8 p-8;
+  background: var(--ui-pd-info-bg);
+  border-bottom: 1px solid var(--ui-pd-info-border);
+  backdrop-filter: var(--ui-glass-filter-strong);
+}
+
+/* The jacket floats gently, faster while playing. */
+.pd-jacket-wrap {
+  position: relative;
+  flex-shrink: 0;
+  z-index: 2;
+  cursor: default;
+  animation: jacketFloat 6s ease-in-out infinite;
+  transition: filter 0.5s ease, transform 0.4s ease;
+}
+
+.pd-jacket-wrap:hover {
+  transform: translateY(-6px) scale(1.04);
+  filter: var(--ui-pd-wrap-hover-filter);
+}
+
+.pd-jacket-wrap.playing {
+  animation: jacketFloatFast 3s ease-in-out infinite;
+  filter: var(--ui-pd-wrap-playing-filter);
+}
+
+html.is-append-diff .pd-jacket-wrap:hover {
+  filter: var(--ui-pd-wrap-hover-filter-append);
+}
+
+html.is-append-diff .pd-jacket-wrap.playing {
+  filter: var(--ui-pd-wrap-playing-filter-append);
+}
+
+@keyframes jacketFloat {
+  0%, 100% { transform: translateY(0px) rotate(-0.5deg); }
+  33%       { transform: translateY(-8px) rotate(0.3deg); }
+  66%       { transform: translateY(-4px) rotate(-0.8deg); }
+}
+
+@keyframes jacketFloatFast {
+  0%, 100% { transform: translateY(0px) rotate(-0.3deg) scale(1); }
+  50%       { transform: translateY(-10px) rotate(0.5deg) scale(1.02); }
+}
+
+/* Two staggered rings ripple out from the jacket while playing. */
+.pd-jacket-wrap::before,
+.pd-jacket-wrap::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 18px;
+  border: 2px solid var(--jacket-color, #3b82f6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.pd-jacket-wrap.playing::before,
+.pd-jacket-wrap.playing::after {
+  @apply inset-0 rounded-xl z-0;
+}
+
+.pd-jacket-wrap.playing::before {
+  animation: jacketRipple 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  border-color: var(--jacket-color, #3b82f6);
+  opacity: 0.7;
+}
+
+.pd-jacket-wrap.playing::after {
+  animation: jacketRipple 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) 1.2s infinite;
+  border-color: color-mix(in srgb, var(--jacket-color, #3b82f6) 70%, rgba(255, 255, 255, 0.2));
+  opacity: 0.5;
+}
+
+@keyframes jacketRipple {
+  0%   { transform: scale(1);    opacity: 0.7; border-width: 2px; }
+  100% { transform: scale(1.45); opacity: 0;   border-width: 0px; }
+}
+
+.pd-jacket {
+  @apply overflow-hidden border flex items-center justify-center relative z-10;
+  width: 160px;
+  height: 160px;
+  border-radius: 16px;
+  background: var(--ui-pd-jacket-bg);
+  border-color: var(--ui-pd-jacket-border);
+  box-shadow: var(--ui-pd-jacket-shadow);
+  transition: box-shadow 0.6s ease;
+}
+
+.pd-jacket img {
+  @apply w-full h-full object-cover;
+}
+
+.pd-jacket-wrap.playing .pd-jacket {
+  box-shadow: var(--ui-pd-jacket-playing-shadow);
+}
+
+html.is-append-diff .pd-jacket {
+  box-shadow: var(--ui-pd-jacket-shadow-append);
+}
+
+html.is-append-diff .pd-jacket-wrap.playing .pd-jacket {
+  box-shadow: var(--ui-pd-jacket-playing-shadow-append);
+}
+
+.pd-meta {
+  @apply flex-1 min-w-0;
+  padding-right: 120px; /* room for the Change Song button */
+}
+
+.pd-title {
+  @apply text-3xl md:text-4xl font-black text-white mb-2 truncate tracking-tight;
+  transition: text-shadow 0.5s ease, color 0.5s ease;
+}
+
+.playing-glow .pd-title {
+  text-shadow: 0 0 30px color-mix(in srgb, var(--jacket-color, #3b82f6) 60%, transparent);
+}
+
+.pd-artist {
+  @apply text-base text-ssm-muted mb-5 truncate;
+}
+
+html[data-theme='light'] .pd-title,
+html[data-theme='light'] .pd-artist {
+  color: #10243c;
+}
+
+.pd-badges {
+  @apply flex flex-wrap items-center gap-3;
+}
+
+.pd-state {
+  @apply flex items-center gap-2 px-3 py-1 font-bold text-white border;
+  border-radius: 999px;
+  background: var(--ui-glass-bg-strong);
+  border-color: var(--ui-glass-border);
+  backdrop-filter: var(--ui-glass-filter);
+  transition: all 0.4s ease;
+}
+
+html[data-theme='light'] .pd-state {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(148, 163, 184, 0.42);
+  color: #1f334c;
+}
+
+html[data-theme='light'] #pn-state-label {
+  color: #1f334c;
+}
+
+.pd-change-btn {
+  @apply text-xs px-3 py-1.5 rounded-full transition-all border cursor-pointer active:scale-95;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+  letter-spacing: 0.04em;
+  background: var(--ui-pd-change-btn-bg);
+  border-color: var(--ui-pd-change-btn-border);
+  color: var(--ui-pd-change-btn-text);
+  backdrop-filter: var(--ui-glass-filter-soft);
+}
+
+.pd-change-btn:hover {
+  background: var(--ui-pd-change-btn-hover-bg);
+  border-color: var(--ui-pd-change-btn-hover-border);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--jacket-color, #3b82f6) 24%, transparent);
+}
+
+/* ── Offset adjustment ───────────────────────────────────── */
+
+.pd-offset-sec {
+  @apply p-6 border-b border-ssm-border/50 flex justify-center;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+html[data-theme='light'] .pd-offset-sec {
+  background: rgba(255, 255, 255, 0.3);
+  border-bottom-color: rgba(148, 163, 184, 0.22);
+}
+
+.pd-offset-container {
+  @apply w-full max-w-2xl;
+}
+
+.pd-offset-header {
+  @apply flex justify-between items-end mb-2 px-1;
+}
+
+.pd-offset-header span {
+  @apply text-[11px] font-bold text-ssm-muted uppercase tracking-widest;
+}
+
+/* Reset */
+.pd-offset-header button {
+  @apply text-[11px] font-bold text-blue-400 hover:text-blue-300 transition-colors cursor-pointer border-none bg-transparent;
+}
+
+html[data-theme='light'] .pd-offset-header button {
+  color: #1e3a8a;
+}
+
+html[data-theme='light'] .pd-offset-header button:hover {
+  color: #1d4ed8;
+}
+
+.pd-offset-bar {
+  @apply flex items-center p-1.5 rounded-xl border shadow-inner gap-1.5;
+  background: var(--ui-glass-bg);
+  border-color: var(--ui-glass-border);
+  backdrop-filter: var(--ui-glass-filter);
+}
+
+html[data-theme='light'] .pd-offset-bar {
+  background: rgba(241, 245, 249, 0.72);
+  border-color: rgba(148, 163, 184, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 8px 20px rgba(15, 23, 42, 0.07);
+}
+
+.pd-offset-bar button {
+  @apply flex-1 h-12 rounded-lg bg-[#27272a] hover:bg-[#3f3f46] text-white font-bold transition-all cursor-pointer active:scale-95 border-none text-xl;
+}
+
+.pd-offset-bar button:active {
+  transform: scale(0.88);
+  background: #1a1a1e;
+}
+
+html[data-theme='light'] .pd-offset-bar button {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 246, 255, 0.98) 100%);
+  border-color: rgba(37, 99, 235, 0.22);
+  color: #10243c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.96), 0 4px 10px rgba(15, 23, 42, 0.08);
+}
+
+html[data-theme='light'] .pd-offset-bar button:hover {
+  background: linear-gradient(180deg, rgba(250, 252, 255, 0.99) 0%, rgba(230, 237, 250, 0.99) 100%);
+  border-color: rgba(37, 99, 235, 0.34);
+  color: #0f2a4a;
+}
+
+.pd-offset-val {
+  @apply w-28 text-center flex flex-col shrink-0 justify-center;
+}
+
+.pd-offset-val span {
+  @apply text-3xl font-mono font-black text-white leading-none;
+}
+
+.pd-offset-val small {
+  @apply text-[10px] text-ssm-hint font-bold uppercase mt-1 tracking-widest;
+}
+
+html[data-theme='light'] .pd-offset-val span {
+  color: #10243c;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+html[data-theme='light'] .pd-offset-val small {
+  color: #5f6f86;
+}
+
+/* ── Start / Restart ─────────────────────────────────────── */
+
+.pd-actions-sec {
+  @apply px-8 py-6 flex flex-col items-center justify-center gap-4;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Glowing line under the buttons. */
+.pd-actions-sec::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--jacket-color, #3b82f6), transparent);
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.pd-actions-sec:hover::before {
+  opacity: 0.7;
+}
+
+html[data-theme='light'] .pd-actions-sec {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.pd-actions-row {
+  @apply flex items-center justify-center gap-5 w-full max-w-lg;
+}
+
+/* Round Restart button: gray, red on hover, with a little shake. */
+.pd-btn-restart {
+  @apply w-16 h-16 rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0;
+  @apply border border-[#3f3f46] bg-[#27272a] text-red-500 hover:bg-red-600 hover:text-white hover:border-red-400 active:scale-90;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* The ↻ glyph, sized independently of the button's font metrics. */
+.pd-btn-restart::after {
+  content: '↻';
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.pd-btn-restart:hover {
+  animation: stopShake 0.3s ease;
+}
+
+@keyframes stopShake {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-4deg); }
+  75%      { transform: rotate(4deg); }
+}
+
+html[data-theme='light'] .pd-btn-restart {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(232, 240, 255, 0.97) 100%);
+  border-color: rgba(37, 99, 235, 0.26);
+  color: #dc2626;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+}
+
+html[data-theme='light'] .pd-btn-restart:hover {
+  background: linear-gradient(180deg, #fff5f5 0%, #ffe4e6 100%);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #b91c1c;
+}
+
+/* Pill-shaped Start button. */
+.pd-btn-start {
+  @apply flex-1 h-16 rounded-full flex items-center justify-center text-xl font-black transition-all cursor-pointer uppercase tracking-[0.15em];
+  @apply border text-white active:scale-95;
+  border-color: rgba(34, 211, 238, 0.6);
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+  backdrop-filter: var(--ui-glass-filter-soft);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    0 0 20px rgba(34, 211, 238, 0.3),
+    0 8px 32px rgba(59, 130, 246, 0.2);
+}
+
+.pd-btn-start:hover:not(:disabled) {
+  @apply border-cyan-300/80;
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.25) 0%, rgba(59, 130, 246, 0.25) 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    0 0 30px rgba(34, 211, 238, 0.5),
+    0 12px 48px rgba(59, 130, 246, 0.3);
+}
+
+.pd-btn-start:disabled {
+  @apply bg-[#18181b] border-[#27272a] text-[#52525b] cursor-not-allowed scale-100 backdrop-blur-none;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme='light'] .pd-btn-start {
+  color: #111827;
+}
+
+html[data-theme='light'] .pd-btn-start:hover:not(:disabled) {
+  color: #000000;
+}
+
+/* ── Keyboard hints ──────────────────────────────────────── */
+
+.ins-group {
+  @apply flex items-center justify-center gap-3 px-0 font-mono text-[12px] text-white/60 w-full max-w-lg mx-auto text-center;
+}
+
+.ins-group-hints {
+  @apply flex items-center justify-center mt-3 gap-6 text-[10px] text-white/50 w-full max-w-lg mx-auto flex-wrap text-center;
+}
+
+.ins-group-hints > div,
+.ins-group-hints > span {
+  @apply inline-flex items-center justify-center gap-1.5;
+}
+
+.ins-group-hints kbd {
+  @apply bg-transparent shadow-none;
+}
+
+.ins-label {
+  @apply text-[11px] text-blue-400 uppercase tracking-[0.1em] font-bold;
+}
+
+.ins-sep {
+  @apply text-[#52525b] text-xs;
+}
+
+html[data-theme='light'] .ins-label {
+  color: #1a1a1a;
+}
+
+html[data-theme='light'] .ins-group-hints {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  text-align: center;
+  color: #1a1a1a;
+}
+
+html[data-theme='light'] .ins-group-hints > div {
+  margin-left: 0;
+}
+
+html[data-theme='light'] .ins-group-hints > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Status dot ──────────────────────────────────────────── */
+
+.dot {
+  @apply w-3 h-3 rounded-full flex-shrink-0 transition-colors duration-300 relative;
+}
+
+.dot.ready {
+  @apply bg-green-500 shadow-[0_0_8px_#22c55e];
+}
+
+.dot.playing {
+  @apply bg-ssm-blue shadow-[0_0_12px_var(--color-ssm-blue)];
+}
+
+.dot.done {
+  @apply bg-green-600;
+}
+
+.dot.error {
+  @apply bg-red-500 shadow-[0_0_8px_#ef4444];
+}
+
+.dot.playing::after {
+  content: '';
+  @apply absolute inset-0 rounded-full bg-ssm-blue opacity-0;
+  animation: playingRipple 1.5s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes playingRipple {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: scale(3.5);
+    opacity: 0;
+  }
+}
+
+#play-log {
+  height: 120px;
+  border-color: color-mix(in srgb, var(--jacket-color, #3b82f6) 30%, transparent);
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+
+@media (max-width: 820px) {
+  .pd-meta {
+    padding-right: 0;
+  }
+
+  .pd-change-btn {
+    position: static;
+    margin-top: 10px;
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .pd-info {
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+    align-items: flex-start;
+  }
+
+  .pd-jacket,
+  .pd-jacket-wrap {
+    width: 116px;
+    height: 116px;
+  }
+
+  .pd-title {
+    font-size: 1.5rem;
+  }
+
+  .pd-artist {
+    margin-bottom: 10px;
+  }
+
+  .pd-offset-sec,
+  .pd-actions-sec {
+    padding: 14px;
+  }
+
+  .pd-offset-bar button {
+    height: 42px;
+    font-size: 18px;
+  }
+
+  .pd-offset-val {
+    width: 86px;
+  }
+
+  .pd-offset-val span {
+    font-size: 1.45rem;
+  }
+
+  .pd-actions-row {
+    gap: 10px;
+  }
+
+  .pd-btn-restart {
+    width: 52px;
+    height: 52px;
+  }
+
+  .pd-btn-restart::after {
+    font-size: 24px;
+  }
+
+  .pd-btn-start {
+    height: 52px;
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+  }
+
+  .ins-group {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+}
+
+@media (max-width: 520px) {
+  .pd-badges {
+    gap: 8px;
+  }
+
+  .pd-state,
+  .pd-change-btn {
+    font-size: 11px;
+  }
+}

@@ -1,0 +1,126 @@
+/* Page frame: root size, background, sidebar + content layout, pages. */
+
+html {
+  font-size: 15px;
+}
+
+body {
+  @apply h-screen overflow-hidden antialiased;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  background:
+    radial-gradient(ellipse 70% 50% at 10% 20%, rgba(59,130,246,0.25), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 75%, rgba(155,149,224,0.2), transparent 55%),
+    radial-gradient(ellipse 40% 60% at 55% 5%, rgba(34,211,238,0.12), transparent 50%),
+    #0e0e12;
+  background-attachment: fixed;
+  color: var(--color-ssm-text);
+}
+
+html[data-theme='light'] body {
+  position: relative;
+  background:
+    radial-gradient(ellipse 74% 52% at 8% 14%, rgba(166, 216, 255, 0.32), transparent 52%),
+    radial-gradient(ellipse 66% 46% at 92% 24%, rgba(255, 184, 222, 0.24), transparent 50%),
+    radial-gradient(ellipse 58% 42% at 56% 6%, rgba(190, 243, 214, 0.2), transparent 48%),
+    linear-gradient(180deg, #f5f8ff 0%, #eaf0fb 40%, #e2eaf8 70%, #d9e4f4 100%);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Light theme artwork behind the glass panels. */
+html[data-theme='light'] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url('../assets/Rana_GBP.webp');
+  background-repeat: no-repeat;
+  background-position: 25% 30%;
+  background-size: auto 180%;
+  opacity: 0.7;
+  filter: saturate(1.18) contrast(1.2);
+}
+
+.layout {
+  @apply flex h-full w-full;
+}
+
+html[data-theme='light'] .layout {
+  position: relative;
+  z-index: 1;
+}
+
+.main {
+  @apply flex-1 p-6 md:p-10;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.pane {
+  @apply hidden;
+}
+
+.pane.active {
+  @apply block;
+}
+
+.pg-title {
+  @apply text-3xl font-extrabold tracking-tight mb-8 text-white;
+}
+
+html[data-theme='light'] .pg-title {
+  color: #10243c;
+}
+
+/* Dropdowns and menus slide in with this. */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1100px) {
+  body {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .layout {
+    min-height: 100dvh;
+    height: auto;
+    flex-direction: column;
+  }
+
+  .main {
+    flex: 1 1 auto;
+    overflow-y: visible;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+
+  .pg-title {
+    margin-bottom: 14px;
+    font-size: 1.7rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .main {
+    padding: 12px;
+  }
+}

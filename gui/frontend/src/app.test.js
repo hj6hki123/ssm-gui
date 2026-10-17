@@ -1,10 +1,9 @@
-// Factory smoke test for the SSM web GUI front-end.
+// End-to-end test of the GUI frontend in jsdom.
 //
-// There is no module boundary in main.js — it wires the whole app to the DOM
-// on import and talks to the backend over fetch + SSE. So this test loads the
-// real index.html markup, stubs fetch / EventSource / localStorage, imports
-// main.js once, then drives every interaction through the same event
-// delegation the browser uses and asserts the resulting DOM / render.
+// Loads the real index.html markup, stubs fetch and EventSource, imports
+// main.js once (which wires every view to the DOM), then drives each feature
+// through the same data-action delegation the browser uses and checks the
+// resulting DOM. Pure data logic is unit-tested next to its module in data/.
 
 import { describe, it, expect, beforeAll, vi } from 'vitest';
 import htmlRaw from '../index.html?raw';
@@ -107,9 +106,9 @@ describe('song setup controls', () => {
   it('toggles game mode and reveals the APPEND difficulty for pjsk', () => {
     click('[data-action="setMode"][data-arg="pjsk"]');
     expect(document.getElementById('mode-pjsk').classList.contains('active')).toBe(true);
-    expect(document.querySelectorAll('.db')[5].style.display).not.toBe('none');
+    expect(document.querySelectorAll('.db')[5].hidden).toBe(false);
     click('[data-action="setMode"][data-arg="bang"]');
-    expect(document.querySelectorAll('.db')[5].style.display).toBe('none');
+    expect(document.querySelectorAll('.db')[5].hidden).toBe(true);
   });
 
   it('switches backend and shows the HID warning only for HID', () => {
@@ -171,7 +170,7 @@ describe('search + song selection', () => {
     document.querySelector('#drop .di[data-action="selSong"]').click();
     expect(document.getElementById('sb-id').textContent).toBe('#325');
     expect(document.getElementById('song-id').value).toBe('325');
-    expect(document.getElementById('sel-bar').classList.contains('show')).toBe(true);
+    expect(document.getElementById('sel-bar').hidden).toBe(false);
   });
 });
 
@@ -180,7 +179,7 @@ describe('SSE → now-playing render', () => {
 
   it('renders both the sidebar and play-deck cards from one message', () => {
     sse.onmessage({ data: JSON.stringify({ state: 2, offset: 7, nowPlaying: np, greatReq: 0, greatApply: 0 }) });
-    expect(document.getElementById('np-card').style.display).toBe('block');
+    expect(document.getElementById('np-card').hidden).toBe(false);
     expect(document.getElementById('np-title').textContent).toBe('EXIST');
     expect(document.getElementById('pn-title-big').textContent).toBe('EXIST');
     expect(document.getElementById('pn-diff-badge').textContent).toBe('EXPERT');
@@ -208,7 +207,7 @@ describe('restart flow (re-arms the same song, no re-load)', () => {
 
   it('clicking Restart posts /api/restart', async () => {
     sse.onmessage({ data: JSON.stringify({ state: 2, offset: 0, nowPlaying: np }) }); // playing
-    expect(document.getElementById('pn-loaded').style.display).toBe('block');
+    expect(document.getElementById('pn-loaded').hidden).toBe(false);
     fetchCalls.length = 0;
     document.querySelector('[data-action="apiRestart"]').click();
     await flush();
@@ -219,14 +218,14 @@ describe('restart flow (re-arms the same song, no re-load)', () => {
     // Backend echoes the last nowPlaying in the idle frame during re-arm; the
     // deck must stay put (no clear / flicker / re-load).
     sse.onmessage({ data: JSON.stringify({ state: 0, offset: 0, nowPlaying: np }) });
-    expect(document.getElementById('pn-loaded').style.display).toBe('block');
+    expect(document.getElementById('pn-loaded').hidden).toBe(false);
     expect(document.getElementById('pn-title-big').textContent).toBe('EXIST');
   });
 
   it('returns to Ready so Start is enabled again without re-loading', () => {
     sse.onmessage({ data: JSON.stringify({ state: 1, offset: 0, nowPlaying: np }) });
     expect(document.getElementById('btn-start').disabled).toBe(false);
-    expect(document.getElementById('pn-loaded').style.display).toBe('block');
+    expect(document.getElementById('pn-loaded').hidden).toBe(false);
   });
 });
 
@@ -305,7 +304,7 @@ describe('manual song id', () => {
   it('resolves a known id against the loaded DB (title + difficulty availability)', () => {
     // DB is cached from the search tests; id 325 is known with diffs 0-3.
     setInput('#song-id', '325');
-    expect(document.getElementById('sel-bar').classList.contains('show')).toBe(true);
+    expect(document.getElementById('sel-bar').hidden).toBe(false);
     expect(document.getElementById('sb-id').textContent).toBe('#325');
     expect(document.getElementById('sb-title').textContent).toBe('EXIST'); // real title, not "Manual input"
     expect(document.querySelectorAll('.db')[4].classList.contains('dis')).toBe(true); // SPECIAL unavailable
@@ -313,7 +312,7 @@ describe('manual song id', () => {
 
   it('clears the selection when the id field is emptied', () => {
     setInput('#song-id', '');
-    expect(document.getElementById('sel-bar').classList.contains('show')).toBe(false);
+    expect(document.getElementById('sel-bar').hidden).toBe(true);
   });
 });
 
@@ -340,8 +339,8 @@ describe('regressions', () => {
     sse.onmessage({ data: JSON.stringify({ state: 1, nowPlaying: np }) });
     const img = document.getElementById('pn-img');
     img.onerror(); // the only URL fails
-    expect(img.style.display).toBe('none');
-    expect(document.getElementById('pn-no').style.display).toBe('flex');
+    expect(img.hidden).toBe(true);
+    expect(document.getElementById('pn-no').hidden).toBe(false);
   });
 
   it('reports a device save that never reached the backend', async () => {
